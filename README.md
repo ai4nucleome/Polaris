@@ -3,7 +3,10 @@
 # A Unified Axial-aware Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
 **Polaris** is an advanced tool designed for rapid and precise detection of chromatin loops from various high-resolution contact maps, including Hi-C, single-cell Hi-C, Micro-C, DNA SPRITE and so on.
 
-![Polaris Model](./doc/Polaris.png "Polaris")
+<div style="text-align: center;">
+    <img src="./doc/Polaris.png" alt="Polaris Model" title="Polaris Model" width="600">
+</div>
+
 
 - Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under **example folder**.
 - The scripts and data to **reproduce our analysis** can be found at: .
@@ -31,7 +34,7 @@ pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https
 </pre>
 Install additional library:
 <pre>
-pip install -r requirement.txt
+pip install -r requirements.txt
 </pre>
 Install Polaris:
 <pre>

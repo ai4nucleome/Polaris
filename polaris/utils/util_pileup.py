@@ -86,9 +86,10 @@ def pileup(w,savefig,p2ll,mindistance,resol,maxdistance,foci,mcool,oe):
             pileup+=mat[0,:,:]
             n+=1
     pileup/=n
+    plt.figure(figsize=(2, 2))
     plt.imshow(pileup,cmap=cmap)
     plt.xticks([])
     plt.yticks([])
     if p2ll:
-        plt.title('P2LL=' + "{:.2f}".format(p2LL(pileup)[0]), fontsize=11)
+        plt.title('P2LL=' + "{:.2f}".format(p2LL(pileup)[0]), fontsize=12)
     plt.savefig(savefig,dpi=600)
