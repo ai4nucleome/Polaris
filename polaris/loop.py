@@ -271,8 +271,8 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, dc, min
                     frag2 = bin_j[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
 
                 # Store the results in memory
-                for i in range(len(frag1)):
-                    if frag1[i] <= frag2[i]:
+                for i in range(len(frag1)):                    
+                    if frag1[i] < frag2[i] and frag2[i]-frag1[i] > 11*resol and frag2[i]-frag1[i] < max_distance:
                         results.append([_chrom, frag1[i], frag1[i] + resol, 
                                         _chrom, frag2[i], frag2[i] + resol, 
                                         prob[i]])

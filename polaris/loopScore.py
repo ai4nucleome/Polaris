@@ -32,7 +32,7 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, input,
     slice_obj_pred = (slice(None), slice(None), slice(start_idx, end_idx), slice(start_idx, end_idx))
     slice_obj_coord = (slice(None), slice(start_idx, end_idx), slice(start_idx, end_idx))
     
-    loopwriter = bedpewriter(output,resol)
+    loopwriter = bedpewriter(output,resol,max_distance)
     
     if cpu:
         device = torch.device("cpu")

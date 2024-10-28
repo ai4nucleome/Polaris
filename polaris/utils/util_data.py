@@ -73,7 +73,7 @@ def getLocal(mat, i, jj, w, N):
     return padded_mat[None,...]
 
 def upperCoo2symm(row,col,data,N=None):
-    print(np.max(row),np.max(col),N)
+    # print(np.max(row),np.max(col),N)
     if N:
         shape=(N,N)
     else:
@@ -116,13 +116,13 @@ def shuffleIF(df):
     return df
 
 class centerPredCoolDataset(Dataset):
-    def __init__(self, coolfile, cchrom, step=224, w=224, max_distance_bin=600, decoy=False, restrictDecoy=False, pair=False):
+    def __init__(self, coolfile, cchrom, step=224, w=224, max_distance_bin=600, decoy=False, restrictDecoy=False):
         '''
         Args:
             step (int): the step of slide window moved and also the center crop size to predict 
         '''
         
-        oeMat, decoyOeMat, N = self._processCoolFile(coolfile, cchrom, decoy=decoy, restrictDecoy=restrictDecoy, pair=pair)
+        oeMat, decoyOeMat, N = self._processCoolFile(coolfile, cchrom, decoy=decoy, restrictDecoy=restrictDecoy)
         self.data, self.i, self.j = self._prepare_data(oeMat, N, step, w, max_distance_bin, decoyOeMat)
         del oeMat, decoyOeMat
 
@@ -158,18 +158,13 @@ class centerPredCoolDataset(Dataset):
                 j_list.append(jj + joffset)
         return data, i_list, j_list
     
-    def _processCoolFile(self, coolfile, cchrom, decoy=False, restrictDecoy=False, pair=False):
-        if pair:
-            ccdata = coolfile[coolfile[0]==cchrom][[1,3,4]]
-            ccdata = ccdata.rename(columns={1:'bin1_id',3:'bin2_id',4:'balanced'})
-            N = max(ccdata['bin1_id'].max(),ccdata['bin2_id'].max()) + 1
-        else:
-            extent = coolfile.extent(cchrom)
-            N = extent[1] - extent[0]
-            ccdata = coolfile.matrix(balance=True, sparse=True, as_pixels=True).fetch(cchrom)
-            ccdata['balanced'] = ccdata['balanced'].fillna(0)
-            ccdata['bin1_id'] -= extent[0]
-            ccdata['bin2_id'] -= extent[0]
+    def _processCoolFile(self, coolfile, cchrom, decoy=False, restrictDecoy=False):
+        extent = coolfile.extent(cchrom)
+        N = extent[1] - extent[0]
+        ccdata = coolfile.matrix(balance=True, sparse=True, as_pixels=True).fetch(cchrom)
+        ccdata['balanced'] = ccdata['balanced'].fillna(0)
+        ccdata['bin1_id'] -= extent[0]
+        ccdata['bin2_id'] -= extent[0]
             
         ccdata['distance'] = ccdata['bin2_id'] - ccdata['bin1_id']
         d_means = ccdata.groupby('distance')['balanced'].transform('mean')
