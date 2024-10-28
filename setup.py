@@ -9,7 +9,7 @@ with open("README.md","r") as readme:
     long_des=readme.read()
 
 setup(
-    name='polaris',
+    name='polaris_loop',
     version='1.0.0',
     author="Yusen HOU, Yanlin Zhang",
     author_email="yhou925@connect.hkust-gz.edu.cn",
@@ -30,8 +30,9 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         # "License :: OSI Approved :: MIT License",
-        'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering :: Computational Biology',
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Operating System :: OS Independent",
     ],
     python_requires='>=3.9',
 )
