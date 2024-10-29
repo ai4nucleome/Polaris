@@ -1,7 +1,7 @@
-<img src="./doc/world_logo.jpg" alt="Polaris" title="Polaris" width="300">
+<img src="./doc/logo.png" alt="Polaris" title="Polaris" width="400">
 
 # A Unified Axial-aware Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
-**Polaris** is an advanced tool designed for rapid and precise detection of chromatin loops from various high-resolution contact maps, including Hi-C, single-cell Hi-C, Micro-C, DNA SPRITE and so on.
+**Polaris** is an advanced computational command line tool tailored for rapid and accurate detection of chromatin loops across a wide range of high-resolution 3D genomic contact maps. It is compatible with data from various experimental protocols, including bulk Hi-C, single-cell Hi-C, Micro-C, DNA SPRITE ......
 
 <div style="text-align: center;">
     <img src="./doc/Polaris.png" alt="Polaris Model" title="Polaris Model" width="600">
@@ -11,8 +11,8 @@
 - Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under **example folder**.
 - The scripts and data to **reproduce our analysis** can be found at: .
 
-<b>NOTE:</b> We suggest users run Polaris on <b>GPU</b>. 
-You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. If you encounter a `CUDA OUT OF MEMORY` error, please: 1. Check the status of your GPU. 2. Try decreasing the `--batchsize` parameter. 
+> <b>NOTE:</b> We suggest users run Polaris on <b>GPU</b>. 
+> You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. If you encounter a `CUDA OUT OF MEMORY` error, please: 1. Check the status of your GPU. 2. Try decreasing the `--batchsize` parameter. 
 
 ## Documentation
 **Extensive documentation** can be found at:  .
@@ -48,7 +48,7 @@ The installation requires network access to download libraries. Usually, the ins
 
 ## Quick Start for Loop Annotation
 ```bash
-polaris loop pred -i [input mcool file] -o [output path for annotated loops]
+polaris loop pred -i [input mcool file] -o [output path of annotated loops]
 ```
 It outputs predicted loops from the input contact map at 5kb resolution.
 ### output format
