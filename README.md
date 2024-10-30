@@ -34,13 +34,9 @@ Install [PyTorch](https://pytorch.org/get-started/locally/) as described on thei
 ```bash
 pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
 ```
-Install additional library:
-```bash
-pip install -r requirements.txt
-```
 Install Polaris:
 ```bash
-pip install --editable .
+pip install --use-pep517 --editable .
 ```
 If fail, please try `python setup build` and `python setup install` first.
 
