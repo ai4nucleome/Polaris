@@ -1,6 +1,6 @@
 <img src="./doc/logo.png" alt="Polaris" title="Polaris" width="400">
 
-# A Unified Axial-aware Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
+# A Universal Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
 **Polaris** is an advanced computational command line tool tailored for rapid and accurate detection of chromatin loops across a wide range of high-resolution 3D genomic contact maps. It is compatible with data from various experimental protocols, including bulk Hi-C, single-cell Hi-C, Micro-C, DNA SPRITE ......
 
 <div style="text-align: center;">
@@ -12,7 +12,11 @@
 - The scripts and data to **reproduce our analysis** can be found at: .
 
 > <b>NOTE:</b> We suggest users run Polaris on <b>GPU</b>. 
-> You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. If you encounter a `CUDA OUT OF MEMORY` error, please: 1. Check the status of your GPU. 2. Try decreasing the `--batchsize` parameter. 
+> You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. 
+
+> <b>NOTE:</b> If you encounter a `CUDA OUT OF MEMORY` error, please: 
+> - Check the status of your GPU.
+> - Try decreasing the `--batchsize` parameter. 
 
 ## Documentation
 **Extensive documentation** can be found at:  .

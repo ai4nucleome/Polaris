@@ -71,16 +71,16 @@ def rhoDelta(data,resol,dc,radius):
     return data
 
 @click.command()
-@click.option('--dc', type=int, default=5, help='distance cutoff for local density calculation in terms of bin. [5]')
+@click.option('--dc', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
 @click.option('--minscore', type=float,default=0.6, help='min loopScore [0.6]')
 @click.option('--resol', default=5000, help='resolution [5000]')
-@click.option('--radius', type=int, default=2, help='radius for KDTree to remove outliers. Sparser data requires a larger radius. [2]')
-@click.option('--mindelta', type=float, default=5, help='min distance allowed between two loops [5]') #! 可以调这个,在10kb或者25kb下调成2
-@click.option('--refine',type=bool,default = True,help ='refine loops. Should always set as True [True]')
-@click.option('-i','--candidates', type=str,required=True,help ='loop candidates file path')
+@click.option('--radius', type=int, default=2, help='Radius threshold to remove outliers. [2]')
+@click.option('--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
+@click.option('--refine',type=bool,default = True,help ='Refine loops, should always set as [True]')
+@click.option('-i','--candidates', type=str,required=True,help ='Loop candidates file path')
 @click.option('-o','--output', type=str,required=True,help ='.bedpe file path to save loops')
 def pool(dc,candidates,resol,mindelta,minscore,output,refine,radius):
-    """call loop from loop candidates by clustering
+    """Call loops from loop candidates by clustering
     """
     data = pd.read_csv(candidates, sep='\t', header=None)
     

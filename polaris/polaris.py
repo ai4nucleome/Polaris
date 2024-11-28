@@ -10,7 +10,7 @@ def cli():
     '''
     Polaris
 
-    A Unified Axial-aware Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
+    A Universal Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
     '''
     pass
 
@@ -19,13 +19,13 @@ def loop():
     '''loop annotation
 
     \b
-    run pred to detect loops from Hi-C data and other data types.
+    Annotate loops from chromosomal contact maps.
     '''
     pass
 
 @cli.group()
 def util():
-    '''utilities'''
+    '''Utilities for analysis and visualization.'''
     pass
 
 loop.add_command(pred)

@@ -173,24 +173,25 @@ def pool(data,dc,resol,mindelta,minscore,output,refine,radius):
 @click.option('--batchsize', type=int, default=128, help='batch size [128]')
 @click.option('--cpu', type=bool, default=False, help='Use CPU [False]')
 @click.option('--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
-@click.option('--chrom', type=str, default=None, help='loop calling for comma separated chroms')
-@click.option('-t', type=int, default=16, help='number of cpu threads; [16]')
-@click.option('--max_distance', type=int, default=3000000, help='max distance (bp) between contact pairs')
-@click.option('--resol',type=int,default=5000,help ='resolution')
-@click.option('--modelstate',type=str,default=None,help='trained model')
-@click.option('--dc', type=int, default=5, help='distance cutoff for local density calculation in terms of bin. [5]')
-@click.option('--minscore', type=float,default=0.6, help='min loopScore [0.6]')
-@click.option('--radius', type=int, default=2, help='radius for KDTree to remove outliers. Sparser data requires a larger radius. [2]')
-@click.option('--mindelta', type=float, default=5, help='min distance allowed between two loops [5]')
-@click.option('--refine',type=bool,default = True,help ='refine loops. Should always set as True [True]')
+@click.option('--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
+@click.option('-t', type=int, default=16, help='Number of cpu threads [16]')
+@click.option('--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs')
+@click.option('--resol',type=int,default=5000,help ='Resolution')
+@click.option('--modelstate',type=str,default=None,help='Model weight')
+@click.option('--dc', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
+@click.option('--minscore', type=float,default=0.6, help='Loop score threshold [0.6]')
+@click.option('--radius', type=int, default=2, help='Radius threshold to remove outliers [2]')
+@click.option('--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
+@click.option('--refine',type=bool,default = True,help ='Refine loops, should always set as [True]')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loops')
-def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, dc, minscore, radius, mindelta, refine, input, output, image=224, center_size=112):
-    """Predict loops from Hi-C contact map
+def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, dc, minscore, radius, mindelta, refine, input, output, image=224):
+    """Predict loops from input contact map directly
     """
     if modelstate is None:
         modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
-
+    
+    center_size = image // 2
     start_idx = (image - center_size) // 2
     end_idx = (image + center_size) // 2
     slice_obj_pred = (slice(None), slice(None), slice(start_idx, end_idx), slice(start_idx, end_idx))
@@ -253,7 +254,7 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, dc, min
         
     chrom = tqdm(chrom, dynamic_ncols=True)
     for _chrom in chrom:
-        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,step=center_size)
+        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size)
         test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=t,prefetch_factor=4,pin_memory=(gpu is not None))
         
         chrom.desc = f"[analyzing {_chrom}]"
