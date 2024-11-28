@@ -1,7 +1,7 @@
 """
 Setup script for Polaris.
 
-A Unified Axial-aware Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
+A Universal Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data.
 """
 
 from setuptools import setup, find_packages
@@ -14,7 +14,7 @@ setup(
     version='1.0.0',
     author="Yusen HOU, Yanlin Zhang",
     author_email="yhou925@connect.hkust-gz.edu.cn",
-    description="A Unified Axial-aware Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data",
+    description="A Universal Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data",
     long_description=long_des,
     long_description_content_type="text/markdown",
     url="https://github.com/compbiodsa/Polaris",
