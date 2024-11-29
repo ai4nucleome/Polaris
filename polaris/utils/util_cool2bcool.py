@@ -8,17 +8,17 @@ import posixpath
 @click.command()
 @click.option('-u', type=int, default=3000000, help='distance upperbund [bp] [default=3000000]')
 @click.option('--resol',default=None,help='comma separated resols for output')
-@click.argument('cool', type=str,required=True)
+@click.argument('mcool', type=str,required=True)
 @click.argument('bcool', type=str,required=True)
-def cool2bcool(cool, bcool,u,resol):
+def cool2bcool(mcool, bcool,u,resol):
     '''covert a .mcool file to a .bcool file'''
     h5opts = _set_h5opts(None)
     copy = ['bins', 'chroms']
     Ofile = h5py.File(bcool, 'w')
-    Ifile = h5py.File(cool, 'r')
+    Ifile = h5py.File(mcool, 'r')
 
     if resol is None:
-        resols = [r.split('/')[-1] for r in cooler.fileops.list_coolers(cool)]
+        resols = [r.split('/')[-1] for r in cooler.fileops.list_coolers(mcool)]
     else:
         resols = resol.split(',')
     # copy bins and chroms
@@ -34,7 +34,7 @@ def cool2bcool(cool, bcool,u,resol):
     Ifile.close()
 
     for group_path in ['/resolutions/'+str(r) for r in resols]:
-        c = cooler.Cooler(cool + '::' + group_path)
+        c = cooler.Cooler(mcool + '::' + group_path)
         nnz_src = c.info['nnz']
         n_bins = c.info['nbins']
         n_chroms = c.info['nchroms']
