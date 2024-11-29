@@ -15,7 +15,6 @@ from sklearn.neighbors import KDTree
 from polaris.utils.util_loop import bedpewriter
 from polaris.model.polarisnet import polarisnet
 from polaris.utils.util_data import centerPredCoolDataset
-# from polaris.utils.util_data_2_3MB import centerPredCoolDataset
 
 def rhoDelta(data,resol,dc,radius): 
     
@@ -82,7 +81,7 @@ def rhoDelta(data,resol,dc,radius):
 
     return data
 
-def pool(data,dc,resol,mindelta,minscore,output,refine,radius):
+def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
     """call loop from loop candidates by clustering
     """
     
@@ -170,26 +169,22 @@ def pool(data,dc,resol,mindelta,minscore,output,refine,radius):
     
     
 @click.command()
-@click.option('--batchsize', type=int, default=128, help='batch size [128]')
+@click.option('--batchsize', type=int, default=128, help='Batch size [128]')
 @click.option('--cpu', type=bool, default=False, help='Use CPU [False]')
 @click.option('--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
 @click.option('--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
 @click.option('-t', type=int, default=16, help='Number of cpu threads [16]')
 @click.option('--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs')
 @click.option('--resol',type=int,default=5000,help ='Resolution')
-@click.option('--modelstate',type=str,default=None,help='Model weight')
 @click.option('--dc', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
 @click.option('--minscore', type=float,default=0.6, help='Loop score threshold [0.6]')
 @click.option('--radius', type=int, default=2, help='Radius threshold to remove outliers [2]')
 @click.option('--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
-@click.option('--refine',type=bool,default = True,help ='Refine loops, should always set as [True]')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loops')
-def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, dc, minscore, radius, mindelta, refine, input, output, image=224):
+def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radius, mindelta, input, output, image=224):
     """Predict loops from input contact map directly
     """
-    if modelstate is None:
-        modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
     
     center_size = image // 2
     start_idx = (image - center_size) // 2
@@ -218,6 +213,7 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, dc, min
             print('GPU is not available, using CPU ...')
 
     coolfile = cooler.Cooler(input + '::/resolutions/' + str(resol))
+    modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
     _modelstate = torch.load(modelstate, map_location=device.type)
     parameters = _modelstate['parameters']
 
@@ -278,7 +274,7 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, dc, min
                                         _chrom, frag2[i], frag2[i] + resol, 
                                         prob[i]])
     df = pd.DataFrame(results)
-    pool(df,dc,resol,mindelta,minscore,output,refine,radius)
+    pool(df,dc,resol,mindelta,minscore,output,radius)
 
 if __name__ == '__main__':
     pred()

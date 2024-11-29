@@ -18,14 +18,11 @@ from polaris.utils.util_data import centerPredCoolDataset
 @click.option('-t', type=int, default=16, help='Number of cpu threads [16]')
 @click.option('--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs')
 @click.option('--resol',type=int,default=5000,help ='Resolution')
-@click.option('--modelstate',type=str,default=None,help='Model weight')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loop candidates')
-def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, input, output, image=224):
+def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, image=224):
     """Predict loop score for each pixel in the input contact map
     """
-    if modelstate is None:
-        modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
 
     center_size = image // 2
     start_idx = (image - center_size) // 2
@@ -54,6 +51,7 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, modelstate, input,
             print('GPU is not available, using CPU ...')
 
     coolfile = cooler.Cooler(input + '::/resolutions/' + str(resol))
+    modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
     _modelstate = torch.load(modelstate, map_location=device.type)
     parameters = _modelstate['parameters']
 

@@ -76,10 +76,9 @@ def rhoDelta(data,resol,dc,radius):
 @click.option('--resol', default=5000, help='resolution [5000]')
 @click.option('--radius', type=int, default=2, help='Radius threshold to remove outliers. [2]')
 @click.option('--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
-@click.option('--refine',type=bool,default = True,help ='Refine loops, should always set as [True]')
 @click.option('-i','--candidates', type=str,required=True,help ='Loop candidates file path')
 @click.option('-o','--output', type=str,required=True,help ='.bedpe file path to save loops')
-def pool(dc,candidates,resol,mindelta,minscore,output,refine,radius):
+def pool(dc,candidates,resol,mindelta,minscore,output,radius,refine=True):
     """Call loops from loop candidates by clustering
     """
     data = pd.read_csv(candidates, sep='\t', header=None)
