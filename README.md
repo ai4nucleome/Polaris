@@ -8,15 +8,15 @@
 </div>
 
 
-- Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under **example folder**.
-- The scripts and data to **reproduce our analysis** can be found at: .
+- Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under [**example folder**](https://github.com/compbiodsa/Polaris/tree/master/example).
+- The scripts and data to **reproduce our analysis** can be found at: [**Polaris Reproducibility**]().
 
 > <b>NOTE:</b> We suggest users run Polaris on <b>GPU</b>. 
 > You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. 
 
-> <b>NOTE:</b> If you encounter a `CUDA OUT OF MEMORY` error, please: 
-> - Check the status of your GPU.
-> - Try decreasing the `--batchsize` parameter. 
+> **Note:** If you encounter a `CUDA OUT OF MEMORY` error, please:
+> - Check your GPU's status and available memory.
+> - Reduce the --batchsize parameter. (The default value of 128 requires approximately 36GB of CUDA memory. Setting it to 24 will reduce the requirement to less than 10GB.)
 
 ## Documentation
 **Extensive documentation** can be found at: [Polaris Doc](https://polairs-doc.readthedocs.io/en/latest/).
@@ -28,7 +28,7 @@ We **strongly recommend** that you install Polaris in a virtual environment.
 We suggest users using [conda](https://anaconda.org/) to create a virtual environment for it (It should also work without using conda, i.e. with pip). You can run the command snippets below to install Polaris:
 
 ```bash
-git clone https://github.com/BlanchetteLab/Polaris.git
+git clone https://github.com/compbiodsa/Polaris.git
 cd Polaris
 conda create -n polaris python=3.9
 conda activate polaris

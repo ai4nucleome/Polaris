@@ -16,7 +16,7 @@ def cli():
 
 @cli.group()
 def loop():
-    '''loop annotation
+    '''Loop annotation.
 
     \b
     Annotate loops from chromosomal contact maps.
@@ -25,7 +25,10 @@ def loop():
 
 @cli.group()
 def util():
-    '''Utilities for analysis and visualization.'''
+    '''Utilities.
+    
+    \b
+    Utilities for analysis and visualization.'''
     pass
 
 loop.add_command(pred)

@@ -1,51 +1,10 @@
-import os
-# import copy
-import torch
 import random
+import warnings
 import numpy as np
-import pickle as pkl
 from scipy.sparse import coo_matrix
-from torch.utils.data import DataLoader, Dataset
-from torch.utils.data.distributed import DistributedSampler
-
-def get_paths(path):
-    paths = []
-    for file in os.listdir(path):
-        assert file.endswith('.pkl') or file.endswith('.npz')
-        paths.append(os.path.join(path, file))
-    paths.sort()
-    return paths
-  
-class MyTrainValDataset(Dataset):
-    
-    def __init__(self, data_paths):
-        self.data_paths = data_paths
-        
-    def __len__(self):
-        return len(self.data_paths)
-    
-    def __getitem__(self, index):
-        file = open(self.data_paths[index],'rb')
-        X,label= pkl.load(file)
-        
-        return torch.from_numpy(X).float(),torch.from_numpy(label).float()
-  
-def get_dataloader(dataset, args, num_workers, train:bool): 
-    if train:
-        sampler = DistributedSampler(dataset, shuffle=True, drop_last=True) 
-        dataloader = DataLoader(dataset=dataset,
-                                batch_size=args.batch_size,
-                                num_workers=num_workers,
-                                pin_memory=True,
-                                shuffle=False,
-                                sampler=sampler, 
-                                drop_last=True
-                                )
-    else:
-        dataloader = DataLoader(dataset=dataset, batch_size=args.batch_size,
-                                shuffle=False, num_workers=num_workers,
-                                drop_last=False, pin_memory=True) 
-    return dataloader
+from torch.utils.data import Dataset
+from scipy.sparse import SparseEfficiencyWarning
+warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
 
 def getLocal(mat, i, jj, w, N):
     if i >= 0 and jj >= 0 and i+w <= N and jj+w <= N:
