@@ -12,7 +12,6 @@ from torch.cuda.amp import autocast
 from torch.utils.data import DataLoader
 
 from sklearn.neighbors import KDTree
-from polaris.utils.util_loop import bedpewriter
 from polaris.model.polarisnet import polarisnet
 from polaris.utils.util_data import centerPredCoolDataset
 

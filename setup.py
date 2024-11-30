@@ -12,7 +12,7 @@ with open("README.md", "r") as readme:
 setup(
     name='polaris',
     version='1.0.0',
-    author="Yusen HOU, Yanlin Zhang",
+    author="Yusen HOU, Audrey Baguette, Mathieu Blanchette*, Yanlin Zhang*",
     author_email="yhou925@connect.hkust-gz.edu.cn",
     description="A Universal Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data",
     long_description=long_des,
@@ -40,7 +40,7 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        # "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: MIT License",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Operating System :: OS Independent",
