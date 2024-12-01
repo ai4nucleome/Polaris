@@ -19,7 +19,7 @@
 > - Reduce the --batchsize parameter. (The default value of 128 requires approximately 36GB of CUDA memory. Setting it to 24 will reduce the requirement to less than 10GB.)
 
 ## Documentation
-**Extensive documentation** can be found at: [Polaris Doc](https://polairs-doc.readthedocs.io/en/latest/).
+**Extensive documentation** can be found at: [Polaris Doc](https://nucleome-polaris.readthedocs.io/en/latest/).
 
 ## Installation
 Polaris is developed and tested on Linux machines with python3.9 and relies on several libraries including pytorch, scipy, etc. 

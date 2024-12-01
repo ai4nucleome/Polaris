@@ -38,5 +38,5 @@ The [APA]() sub-folder contains the Aggregate Peak Analysis result of loops dete
 
 
 ---
-- **Extensive documentation** can be found at: [Polaris Documentaion](https://polairs-doc.readthedocs.io/en/latest/index.html).
+- **Extensive documentation** can be found at: [Polaris Documentaion](https://nucleome-polaris.readthedocs.io/en/latest/).
 - You can find more detailed tutorials in the **Jupyter Notebooks located within the respective subfolders**.
