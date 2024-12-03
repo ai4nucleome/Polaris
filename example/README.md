@@ -14,7 +14,7 @@ You can re-run **Polaris** to reproduce these results by following the commands 
 polaris loop pred --chrom chr15,chr16,chr17 -i ./loop_annotation/GM12878_250M.bcool -o ./loop_annotation/GM12878_250M_chr151617_loops.bedpe
 ```
 
-The [loop_annotation]() sub-folder contains the results on bulk Hi-C data of GM12878 (250M valid read pairs).
+The [loop_annotation](https://github.com/compbiodsa/Polaris/tree/master/example/loop_annotation) sub-folder contains the results on bulk Hi-C data of GM12878 (250M valid read pairs).
 
 
 
@@ -24,7 +24,7 @@ The [loop_annotation]() sub-folder contains the results on bulk Hi-C data of GM1
 polaris util pileup --savefig ./APA/GM12878_250M_chr151617_loops.pileup.png --p2ll True ./loop_annotation/GM12878_250M_chr151617_loops.bedpe ./loop_annotation/GM12878_250M.bcool
 ```
 
-The [APA]() sub-folder contains the Aggregate Peak Analysis result of loops detected on GM12878 (250M Valid Read Pairs) by Polaris.
+The [APA](https://github.com/compbiodsa/Polaris/tree/master/example/APA) sub-folder contains the Aggregate Peak Analysis result of loops detected on GM12878 (250M Valid Read Pairs) by Polaris.
 
 <div style="text-align: center;">
     <figure>

@@ -8,8 +8,8 @@
 </div>
 
 
-- Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under [**example folder**](https://github.com/compbiodsa/Polaris/tree/master/example).
-- The scripts and data to **reproduce our analysis** can be found at: [**Polaris Reproducibility**]().
+- Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under [**example folder**](https://github.com/ai4nucleome/Polaris/tree/master/example).
+- The scripts and data to **reproduce our analysis** can be found at: [**Polaris Reproducibility**](https://zenodo.org/).
 
 > <b>NOTE:</b> We suggest users run Polaris on <b>GPU</b>. 
 > You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. 
@@ -28,7 +28,7 @@ We **strongly recommend** that you install Polaris in a virtual environment.
 We suggest users using [conda](https://anaconda.org/) to create a virtual environment for it (It should also work without using conda, i.e. with pip). You can run the command snippets below to install Polaris:
 
 ```bash
-git clone https://github.com/compbiodsa/Polaris.git
+git clone https://github.com/ai4nucleome/Polaris.git
 cd Polaris
 conda create -n polaris python=3.9
 conda activate polaris
