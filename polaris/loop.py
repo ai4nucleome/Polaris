@@ -18,7 +18,6 @@ from polaris.utils.util_data import centerPredCoolDataset
 def rhoDelta(data,resol,dc,radius): 
     
     pos = data[[1, 4]].to_numpy() // resol
-    # remove singleton
     posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
     NNindexes, NNdists = posTree.query_radius(pos, r=radius, return_distance=True)
     _l = []
@@ -27,7 +26,6 @@ def rhoDelta(data,resol,dc,radius):
     _l=np.asarray(_l)
     data = data[_l>5].reset_index(drop=True)
     
-    # end of remove singleton
     pos = data[[1, 4]].to_numpy() // resol
     val = data[6].to_numpy()
 
@@ -43,14 +41,11 @@ def rhoDelta(data,resol,dc,radius):
         else:
             raise
 
-    # calculate local density rho
     rhos = []
     for i in range(len(NNindexes)):
-        # rhos.append(np.sum(np.exp(-(NNdists[i] / dc) ** 2)))
         rhos.append(np.dot(np.exp(-(NNdists[i] / dc) ** 2), val[NNindexes[i]]))
     rhos = np.asarray(rhos)
 
-    # calculate delta_i, i.e. distance to nearest point with larger rho
     _r = 100
     _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
     deltas = rhos * 0
@@ -81,8 +76,6 @@ def rhoDelta(data,resol,dc,radius):
     return data
 
 def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
-    """call loop from loop candidates by clustering
-    """
     
     if data.shape[0] == 0:
         print("#"*88,'\n#')
@@ -114,7 +107,6 @@ def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
         deltas = data['deltas'].to_numpy()
         centroid = np.argwhere((rhos > minrho) & (deltas > mindelta)).flatten()
 
-        # calculate delta_i, i.e. distance to nearest point with larger rho
         _r = 100
         _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
         LargerNei = rhos * 0 - 1
@@ -137,7 +129,6 @@ def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
                     LargerNei[failed[i]] = _indexes[i][idx[0]]
             failed = np.argwhere(LargerNei == -1).flatten()
 
-        # assign rest loci to loop clusters
         LargerNei = LargerNei.astype(int)
         label = LargerNei * 0 - 1
         for i in range(len(centroid)):
@@ -147,7 +138,6 @@ def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
             if label[i] == -1:
                 label[i] = label[LargerNei[i]]
 
-        # refine loop
         val = data[6].to_numpy()
         refinedLoop = []
         label = label.flatten()
@@ -266,7 +256,6 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radiu
                     frag1 = bin_i[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
                     frag2 = bin_j[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
 
-                # Store the results in memory
                 for i in range(len(frag1)):                    
                     if frag1[i] < frag2[i] and frag2[i]-frag1[i] > 11*resol and frag2[i]-frag1[i] < max_distance:
                         results.append([_chrom, frag1[i], frag1[i] + resol, 

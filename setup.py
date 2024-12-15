@@ -17,7 +17,7 @@ setup(
     description="A Universal Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data",
     long_description=long_des,
     long_description_content_type="text/markdown",
-    url="https://github.com/compbiodsa/Polaris",
+    url="https://github.com/ai4nucleome/Polaris",
     packages=['polaris'],
     include_package_data=True,
     install_requires=[
@@ -30,6 +30,7 @@ setup(
         'pandas==1.3.0',
         'scikit-learn==1.4.2',
         'scipy==1.7.3',
+        'torch==2.2.2',
         'timm==0.6.12',
         'tqdm==4.65.0',
     ],

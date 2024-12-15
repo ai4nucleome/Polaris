@@ -8,7 +8,6 @@ from tqdm import tqdm
 def rhoDelta(data,resol,dc,radius): 
     
     pos = data[[1, 4]].to_numpy() // resol
-    # remove singleton
     posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
     NNindexes, NNdists = posTree.query_radius(pos, r=radius, return_distance=True)
     _l = []
@@ -17,7 +16,6 @@ def rhoDelta(data,resol,dc,radius):
     _l=np.asarray(_l)
     data = data[_l>5].reset_index(drop=True)
     
-    # end of remove singleton
     pos = data[[1, 4]].to_numpy() // resol
     val = data[6].to_numpy()
 
@@ -33,14 +31,11 @@ def rhoDelta(data,resol,dc,radius):
         else:
             raise
 
-    # calculate local density rho
     rhos = []
     for i in range(len(NNindexes)):
-        # rhos.append(np.sum(np.exp(-(NNdists[i] / dc) ** 2)))
         rhos.append(np.dot(np.exp(-(NNdists[i] / dc) ** 2), val[NNindexes[i]]))
     rhos = np.asarray(rhos)
 
-    # calculate delta_i, i.e. distance to nearest point with larger rho
     _r = 100
     _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
     deltas = rhos * 0
@@ -69,6 +64,8 @@ def rhoDelta(data,resol,dc,radius):
     data['deltas']=deltas
 
     return data
+
+
 
 @click.command()
 @click.option('--dc', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
@@ -113,7 +110,6 @@ def pool(dc,candidates,resol,mindelta,minscore,output,radius,refine=True):
         deltas = data['deltas'].to_numpy()
         centroid = np.argwhere((rhos > minrho) & (deltas > mindelta)).flatten()
 
-        # calculate delta_i, i.e. distance to nearest point with larger rho
         _r = 100
         _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
         LargerNei = rhos * 0 - 1
@@ -136,7 +132,6 @@ def pool(dc,candidates,resol,mindelta,minscore,output,radius,refine=True):
                     LargerNei[failed[i]] = _indexes[i][idx[0]]
             failed = np.argwhere(LargerNei == -1).flatten()
 
-        # assign rest loci to loop clusters
         LargerNei = LargerNei.astype(int)
         label = LargerNei * 0 - 1
         for i in range(len(centroid)):
@@ -146,7 +141,6 @@ def pool(dc,candidates,resol,mindelta,minscore,output,radius,refine=True):
             if label[i] == -1:
                 label[i] = label[LargerNei[i]]
 
-        # refine loop
         val = data[6].to_numpy()
         refinedLoop = []
         label = label.flatten()
