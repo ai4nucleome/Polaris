@@ -9,7 +9,7 @@
 
 
 - Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under [**example folder**](https://github.com/ai4nucleome/Polaris/tree/master/example).
-- The scripts and data to **reproduce our analysis** can be found at: [**Polaris Reproducibility**](https://zenodo.org/).
+- The scripts and data to **reproduce our analysis** can be found at: [**Polaris Reproducibility**](https://zenodo.org/records/14294273).
 
 > <b>NOTE:</b> We suggest users run Polaris on <b>GPU</b>. 
 > You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. 
