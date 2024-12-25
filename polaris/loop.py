@@ -214,7 +214,7 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radiu
             if 'chr' not in chrom[i]:
                 chrom[i] = f'chr{chrom[i]}'
         
-    for rmchr in ['chrMT','MT','chrM','M','Y','chrY',]: # 'Y','chrY','X','chrX'
+    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX']: # 'Y','chrY','X','chrX'
         if rmchr in chrom:
             chrom.remove(rmchr)    
                   

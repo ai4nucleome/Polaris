@@ -1,3 +1,8 @@
+# My code has references to the following repositories:
+# RefHiC: https://github.com/BlanchetteLab/RefHiC
+# Axial Attention: https://github.com/lucidrains/axial-attention
+# --------------------------------------------------------
+
 """
 Setup script for Polaris.
 
