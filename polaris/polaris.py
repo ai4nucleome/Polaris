@@ -10,7 +10,7 @@ def cli():
     '''
     Polaris
 
-    A Universal Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
+    A Versatile Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
     '''
     pass
 
