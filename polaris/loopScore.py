@@ -23,7 +23,8 @@ from polaris.utils.util_data import centerPredCoolDataset
 def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, image=224):
     """Predict loop score for each pixel in the input contact map
     """
-
+    print('Polaris Loop Prediction START :) ')
+    
     center_size = image // 2
     start_idx = (image - center_size) // 2
     end_idx = (image + center_size) // 2
@@ -33,22 +34,27 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, ima
     loopwriter = bedpewriter(output,resol,max_distance)
     
     if cpu:
+        assert gpu is None, "\033[91m QAQ The CPU and GPU modes cannot be used simultaneously. Please check the command. \033[0m\n"
+        gpu = ['None']
         device = torch.device("cpu")
-        print('using CPU ...')
+        print('Using CPU mode... (This may take significantly longer than using GPU mode.)')
     else:
         if torch.cuda.is_available():
             if gpu is not None:
-                print('using cuda: '+ gpu)
+                print("Using the specified GPU: " + gpu)
                 gpu=[int(i) for i in gpu.split(',')]
                 device = torch.device(f"cuda:{gpu[0]}")
             else:
                 gpuIdx = torch.cuda.current_device()
                 device = torch.device(gpuIdx)
-                print('use gping ' + "cuda:" + str(gpuIdx))
+                print("Automatically selected GPU: " + str(gpuIdx))
                 gpu=[gpu]
         else:
             device = torch.device("cpu")
-            print('GPU is not available, using CPU ...')
+            gpu = ['None']
+            print('GPU is not available!')
+            print('Using CPU mode... (This may take significantly longer than using GPU mode.)')
+           
 
     coolfile = cooler.Cooler(input + '::/resolutions/' + str(resol))
     modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
