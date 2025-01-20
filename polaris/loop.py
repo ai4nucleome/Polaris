@@ -203,6 +203,7 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radiu
         else:
             device = torch.device("cpu")
             gpu = ['None']
+            cpu = True
             print('GPU is not available!')
             print('Using CPU mode... (This may take significantly longer than using GPU mode.)')
             
