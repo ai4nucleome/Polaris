@@ -25,8 +25,7 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, ima
     """
     print('polaris loop score START :) ')
     
-    # center_size = image // 2
-    center_size = 224
+    center_size = image // 2
     start_idx = (image - center_size) // 2
     end_idx = (image + center_size) // 2
     slice_obj_pred = (slice(None), slice(None), slice(start_idx, end_idx), slice(start_idx, end_idx))
@@ -67,9 +66,6 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, ima
         chrom =coolfile.chromnames
     else:
         chrom = chrom.split(',')
-        # for i in range(len(chrom)):
-        #     if 'chr' not in chrom[i]:
-        #         chrom[i] = f'chr{chrom[i]}'
         
     for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX']: # 'Y','chrY','X','chrX'
         if rmchr in chrom:
@@ -94,17 +90,14 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, ima
         model = nn.DataParallel(model, device_ids=gpu) 
     model.eval()
         
-    # chrom = tqdm(chrom, dynamic_ncols=True)
+    chrom = tqdm(chrom, dynamic_ncols=True)
     for _chrom in chrom:
         test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size)
         test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=t,prefetch_factor=4,pin_memory=(gpu is not None))
-        print(_chrom)
-        print(test_data.vnum)
-        print(test_data.cnum)
-        # chrom.desc = f"[analyzing {_chrom}]"
+        
+        chrom.desc = f"[analyzing {_chrom}]"
               
         with torch.no_grad():
-            test_dataloader = tqdm(test_dataloader, dynamic_ncols=True)
             for X in test_dataloader:
                 bin_i,bin_j,targetX=X
                 bin_i = bin_i*resol
