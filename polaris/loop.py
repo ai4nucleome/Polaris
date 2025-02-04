@@ -174,7 +174,7 @@ def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
 def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radius, mindelta, input, output, image=224):
     """Predict loops from input contact map directly
     """
-    print('Polaris Loop Prediction START :)')
+    print('polaris loop pred START :)')
     
     center_size = image // 2
     start_idx = (image - center_size) // 2
