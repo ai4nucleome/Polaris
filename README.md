@@ -23,7 +23,7 @@
 > <b>NOTE:</b> We suggest users run Polaris on <b>GPU</b>. 
 > You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. 
 
-> **Note:** If you encounter a `CUDA OUT OF MEMORY` error, please:
+> **NOTE:** If you encounter a `CUDA OUT OF MEMORY` error, please:
 > - Check your GPU's status and available memory.
 > - Reduce the --batchsize parameter. (The default value of 128 requires approximately 36GB of CUDA memory. Setting it to 24 will reduce the requirement to less than 10GB.)
 
@@ -42,6 +42,36 @@ cd Polaris
 conda create -n polaris python=3.9
 conda activate polaris
 ```
+-------
+### Important Note: Downloading Polaris Network  Weights
+
+The Polaris repository utilizes Git Large File Storage (Git-LFS) to host its pre-trained model weight files. Standard `git clone` operations **will not** automatically download these large files unless Git-LFS is installed and configured. To resolve this, please follow one of the methods below:
+
+#### Method 1: Manual Download via Browser
+
+1. Directly download the pre-trained model weights (`sft_loop.pt`) from the [Polaris model directory](https://github.com/ai4nucleome/Polaris/blob/master/polaris/model/sft_loop.pt).
+2. Save the file to the directory:
+    ```bash
+    Polaris/polaris/model/
+    ```
+#### Method 2: Install Git-LFS
+1. Install Git-LFS by following the official instructions: [Git-LFS Installation Guide](https://git-lfs.com/).
+
+2. After installation, either:
+
+    Re-clone the repository:
+
+    ```bash
+    git clone https://github.com/ai4nucleome/Polaris.git
+    ```
+    OR, if the repository is already cloned, run:
+
+    ```bash
+    git lfs pull
+    ```
+    This ensures all large files, including model weights, are retrieved.
+----------
+
 Install [PyTorch](https://pytorch.org/get-started/locally/) as described on their website. It might be the following command depending on your cuda version:
 
 ```bash
