@@ -7,7 +7,7 @@
 """
 Setup script for Polaris.
 
-A Versatile Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data.
+A Versatile Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data.
 """
 
 from setuptools import setup, find_packages
@@ -17,10 +17,10 @@ with open("README.md", "r") as readme:
 
 setup(
     name='polaris',
-    version='1.0.0',
+    version='1.0.1',
     author="Yusen HOU, Audrey Baguette, Mathieu Blanchette*, Yanlin Zhang*",
     author_email="yhou925@connect.hkust-gz.edu.cn",
-    description="A Versatile Tool for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data",
+    description="A Versatile Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data",
     long_description=long_des,
     long_description_content_type="text/markdown",
     url="https://github.com/ai4nucleome/Polaris",
