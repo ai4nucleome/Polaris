@@ -75,12 +75,13 @@ def shuffleIF(df):
     return df
 
 class centerPredCoolDataset(Dataset):
-    def __init__(self, coolfile, cchrom, step=224, w=224, max_distance_bin=600, decoy=False, restrictDecoy=False):
+    def __init__(self, coolfile, cchrom, step=224, w=224, max_distance_bin=600, decoy=False, restrictDecoy=False, s=0.9):
         '''
         Args:
             step (int): the step of slide window moved and also the center crop size to predict 
         '''
         
+        self.s=s
         oeMat, decoyOeMat, N = self._processCoolFile(coolfile, cchrom, decoy=decoy, restrictDecoy=restrictDecoy)
         self.data, self.i, self.j = self._prepare_data(oeMat, N, step, w, max_distance_bin, decoyOeMat)
         del oeMat, decoyOeMat
@@ -106,7 +107,7 @@ class centerPredCoolDataset(Dataset):
             jj = j + i
             # if jj + w <= N and i + w <= N:
             _oeMat = getLocal(oeMat, i, jj, w, N)
-            if np.sum(_oeMat == 0) <= (w*w*0.9):
+            if np.sum(_oeMat == 0) <= (w*w*self.s):
                 if decoyOeMat is not None:
                     _decoyOeMat = getLocal(decoyOeMat, i, jj, w, N)
                     data.append(np.vstack((_oeMat, _decoyOeMat)))

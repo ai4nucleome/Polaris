@@ -11,19 +11,21 @@ from polaris.model.polarisnet import polarisnet
 from polaris.utils.util_data import centerPredCoolDataset
 
 @click.command()
-@click.option('--batchsize', type=int, default=128, help='Batch size [128]')
-@click.option('--cpu', type=bool, default=False, help='Use CPU [False]')
-@click.option('--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
-@click.option('--chrom', type=str, default=None, help='Comma separated chroms')
-@click.option('-t', type=int, default=16, help='Number of cpu threads [16]')
-@click.option('--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs')
-@click.option('--resol',type=int,default=5000,help ='Resolution')
+@click.option('-b','--batchsize', type=int, default=128, help='Batch size [128]')
+@click.option('-C','--cpu', type=bool, default=False, help='Use CPU [False]')
+@click.option('-G','--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
+@click.option('-c','--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
+@click.option('-nw','--workers', type=int, default=16, help='Number of cpu threads [16]')
+@click.option('-t','--threshold', type=float, default=0.5, help='Loop Score Threshold [0.5]')
+@click.option('-s','--sparsity', type=float, default=0.9, help='Allowed sparsity of submatrices [0.9]')
+@click.option('-md','--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs [3000000]')
+@click.option('-r','--resol',type=int,default=5000,help ='Resolution [5000]')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loop candidates')
-def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, image=224):
+def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance, resol, input, output, image=224):
     """Predict loop score for each pixel in the input contact map
     """
-    print('polaris loop score START :) ')
+    print('\npolaris loop score START :) ')
     
     center_size = image // 2
     start_idx = (image - center_size) // 2
@@ -71,7 +73,7 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, ima
         if rmchr in chrom:
             chrom.remove(rmchr)    
                   
-    print(f"\nAnalysing chroms: {chrom}")
+    print(f"Analysing chroms: {chrom}")
     
     model = polarisnet(
             image_size=parameters['image_size'], 
@@ -92,10 +94,10 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, ima
         
     chrom = tqdm(chrom, dynamic_ncols=True)
     for _chrom in chrom:
-        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size)
-        test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=t,prefetch_factor=4,pin_memory=(gpu is not None))
+        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity)
+        test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=workers,prefetch_factor=4,pin_memory=(gpu is not None))
         
-        chrom.desc = f"[analyzing {_chrom}]"
+        chrom.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"
               
         with torch.no_grad():
             for X in test_dataloader:
@@ -104,12 +106,14 @@ def score(batchsize, cpu, gpu, chrom, t, max_distance, resol, input, output, ima
                 bin_j = bin_j*resol
                 with autocast():
                     pred = torch.sigmoid(model(targetX.float().to(device)))[slice_obj_pred].flatten()
-                    loop = torch.nonzero(pred>0.5).flatten().cpu()
+                    loop = torch.nonzero(pred>threshold).flatten().cpu()
                     prob = pred[loop].cpu().numpy().flatten().tolist()
                     frag1 = bin_i[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
                     frag2 = bin_j[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
 
-                loopwriter.write(_chrom,frag1,frag2,prob)              
+                loopwriter.write(_chrom,frag1,frag2,prob)   
+    
+    print(f'\npolaris loop score FINISHED :)\nLoopscore file saved at {output}')           
 
 if __name__ == '__main__':
     score()

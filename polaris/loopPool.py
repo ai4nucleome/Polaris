@@ -25,7 +25,7 @@ def rhoDelta(data,resol,dc,radius):
     except ValueError as e:
         if "Found array with 0 sample(s)" in str(e):
             print("#"*88,'\n#')
-            print("#\033[91m Error!!! The data is too sparse. Please increase the value of: [radius]\033[0m\n#")
+            print("#\033[91m Error!!! The data is too sparse. Please decrease the value of: [t]\033[0m\n#")
             print("#"*88,'\n')
             sys.exit(1)
         else:
@@ -68,16 +68,18 @@ def rhoDelta(data,resol,dc,radius):
 
 
 @click.command()
-@click.option('--dc', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
-@click.option('--minscore', type=float,default=0.6, help='min loopScore [0.6]')
-@click.option('--resol', default=5000, help='resolution [5000]')
-@click.option('--radius', type=int, default=2, help='Radius threshold to remove outliers. [2]')
-@click.option('--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
+@click.option('-dc','--distance_cutoff', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
+@click.option('-t','--threshold', type=float, default=0.6, help='Loop score threshold [0.6]')
+@click.option('-r','--resol', default=5000, help='resolution [5000]')
+@click.option('-R','--radius', type=int, default=2, help='Radius threshold to remove outliers. [2]')
+@click.option('-d','--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
 @click.option('-i','--candidates', type=str,required=True,help ='Loop candidates file path')
 @click.option('-o','--output', type=str,required=True,help ='.bedpe file path to save loops')
-def pool(dc,candidates,resol,mindelta,minscore,output,radius,refine=True):
+def pool(distance_cutoff,candidates,resol,mindelta,threshold,output,radius,refine=True):
     """Call loops from loop candidates by clustering
     """
+    print('\npolaris loop pool START :) ')
+    
     data = pd.read_csv(candidates, sep='\t', header=None)
     
     if data.shape[0] == 0:
@@ -85,15 +87,15 @@ def pool(dc,candidates,resol,mindelta,minscore,output,radius,refine=True):
         print("#\033[91m Error!!! The file is empty. Please check your file.\033[0m\n#")
         print("#"*88,'\n')
         sys.exit(1)
-    data = data[data[6] > minscore].reset_index(drop=True)
+    data = data[data[6] > threshold].reset_index(drop=True)
     data = data[data[4] - data[1] > 11*resol].reset_index(drop=True)
     if data.shape[0] == 0:
         print("#"*88,'\n#')
-        print("#\033[91m Error!!! The data is too sparse. Please decrease: [minscore] (minimum: 0.5).\033[0m\n#")
+        print("#\033[91m Error!!! The data is too sparse. Please decrease: [threshold] (minimum: 0.5).\033[0m\n#")
         print("#"*88,'\n')
         sys.exit(1)
     data[['rhos','deltas']]=0
-    data=data.groupby([0]).apply(rhoDelta,resol=resol,dc=dc,radius=radius).reset_index(drop=True)
+    data=data.groupby([0]).apply(rhoDelta,resol=resol,dc=distance_cutoff,radius=radius).reset_index(drop=True)
     minrho=0
     targetData=data.reset_index(drop=True)
 
@@ -156,7 +158,7 @@ def pool(dc,candidates,resol,mindelta,minscore,output,radius,refine=True):
     loopPd=pd.concat(loopPds).sort_values(6,ascending=False)
     loopPd[[1, 2, 4, 5]] = loopPd[[1, 2, 4, 5]].astype(int)
     loopPd[[0,1,2,3,4,5,6]].to_csv(output,sep='\t',header=False, index=False)
-    print(len(loopPd),'loops saved to ',output)
+    print(f'\npolaris loop score FINISHED :)\n{len(loopPd)} loops saved to {output}')
 
 if __name__ == '__main__':
     pool()

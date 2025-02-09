@@ -35,7 +35,7 @@ def rhoDelta(data,resol,dc,radius):
     except ValueError as e:
         if "Found array with 0 sample(s)" in str(e):
             print("#"*88,'\n#')
-            print("#\033[91m Error!!! The data is too sparse. Please increase the value of: [radius]\033[0m\n#")
+            print("#\033[91m Error!!! The data is too sparse. Please increase the value of: [t]\033[0m\n#")
             print("#"*88,'\n')
             sys.exit(1)
         else:
@@ -75,18 +75,18 @@ def rhoDelta(data,resol,dc,radius):
 
     return data
 
-def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
+def pool(data,dc,resol,mindelta,t,output,radius,refine=True):
     
     if data.shape[0] == 0:
         print("#"*88,'\n#')
         print("#\033[91m Error!!! The file is empty. Please check your file.\033[0m\n#")
         print("#"*88,'\n')
         sys.exit(1)
-    data = data[data[6] > minscore].reset_index(drop=True)
+    data = data[data[6] > t].reset_index(drop=True)
     data = data[data[4] - data[1] > 11*resol].reset_index(drop=True)
     if data.shape[0] == 0:
         print("#"*88,'\n#')
-        print("#\033[91m Error!!! The data is too sparse. Please decrease: [minscore] (minimum: 0.5).\033[0m\n#")
+        print("#\033[91m Error!!! The data is too sparse. Please decrease: [threshold] (minimum: 0.5).\033[0m\n#")
         print("#"*88,'\n')
         sys.exit(1)
     data[['rhos','deltas']]=0
@@ -153,28 +153,29 @@ def pool(data,dc,resol,mindelta,minscore,output,radius,refine=True):
     loopPd=pd.concat(loopPds).sort_values(6,ascending=False)
     loopPd[[1, 2, 4, 5]] = loopPd[[1, 2, 4, 5]].astype(int)
     loopPd[[0,1,2,3,4,5,6]].to_csv(output,sep='\t',header=False, index=False)
-    print(len(loopPd),'loops saved to ',output)
-    
+
+    return len(loopPd)
     
     
 @click.command()
-@click.option('--batchsize', type=int, default=128, help='Batch size [128]')
-@click.option('--cpu', type=bool, default=False, help='Use CPU [False]')
-@click.option('--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
-@click.option('--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
-@click.option('-t', type=int, default=16, help='Number of cpu threads [16]')
-@click.option('--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs')
-@click.option('--resol',type=int,default=5000,help ='Resolution')
-@click.option('--dc', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
-@click.option('--minscore', type=float,default=0.6, help='Loop score threshold [0.6]')
-@click.option('--radius', type=int, default=2, help='Radius threshold to remove outliers [2]')
-@click.option('--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
+@click.option('-b','--batchsize', type=int, default=128, help='Batch size [128]')
+@click.option('-C','--cpu', type=bool, default=False, help='Use CPU [False]')
+@click.option('-G','--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
+@click.option('-c','--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
+@click.option('-nw','--workers', type=int, default=16, help='Number of cpu threads [16]')
+@click.option('-t','--threshold', type=float, default=0.6, help='Loop Score Threshold [0.6]')
+@click.option('-s','--sparsity', type=float, default=0.9, help='Allowed sparsity of submatrices [0.9]')
+@click.option('-md','--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs [3000000]')
+@click.option('-r','--resol',type=int,default=5000,help ='Resolution [5000]')
+@click.option('-dc','--distance_cutoff', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
+@click.option('-R','--radius', type=int, default=2, help='Radius threshold to remove outliers. [2]')
+@click.option('-d','--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loops')
-def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radius, mindelta, input, output, image=224):
+def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance, resol, distance_cutoff, radius, mindelta, input, output, image=224):
     """Predict loops from input contact map directly
     """
-    print('polaris loop pred START :)')
+    print('\npolaris loop pred START :)')
     
     center_size = image // 2
     start_idx = (image - center_size) // 2
@@ -225,7 +226,7 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radiu
         if rmchr in chrom:
             chrom.remove(rmchr)    
                   
-    print(f"\nAnalysing chroms: {chrom}")
+    print(f"Analysing chroms: {chrom}")
     
     model = polarisnet(
             image_size=parameters['image_size'], 
@@ -246,10 +247,10 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radiu
         
     chrom = tqdm(chrom, dynamic_ncols=True)
     for _chrom in chrom:
-        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size)
-        test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=t,prefetch_factor=4,pin_memory=(gpu is not None))
+        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity)
+        test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=workers,prefetch_factor=4,pin_memory=(gpu is not None))
         
-        chrom.desc = f"[analyzing {_chrom}]"
+        chrom.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"
               
         with torch.no_grad():
             for X in test_dataloader:
@@ -258,7 +259,7 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radiu
                 bin_j = bin_j*resol
                 with autocast():
                     pred = torch.sigmoid(model(targetX.float().to(device)))[slice_obj_pred].flatten()
-                    loop = torch.nonzero(pred>0.5).flatten().cpu()
+                    loop = torch.nonzero(pred>threshold).flatten().cpu()
                     prob = pred[loop].cpu().numpy().flatten().tolist()
                     frag1 = bin_i[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
                     frag2 = bin_j[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
@@ -269,7 +270,9 @@ def pred(batchsize, cpu, gpu, chrom, t, max_distance, resol, dc, minscore, radiu
                                         _chrom, frag2[i], frag2[i] + resol, 
                                         prob[i]])
     df = pd.DataFrame(results)
-    pool(df,dc,resol,mindelta,minscore,output,radius)
-
+    loopNum = pool(df,distance_cutoff,resol,mindelta,threshold,output,radius)
+    
+    print(f'\npolaris loop pred FINISHED :)\n{loopNum} loops saved to {output}')
+            
 if __name__ == '__main__':
     pred()
