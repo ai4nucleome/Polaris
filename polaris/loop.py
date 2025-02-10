@@ -218,9 +218,6 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
         chrom =coolfile.chromnames
     else:
         chrom = chrom.split(',')
-        for i in range(len(chrom)):
-            if 'chr' not in chrom[i]:
-                chrom[i] = f'chr{chrom[i]}'
         
     for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX']: # 'Y','chrY','X','chrX'
         if rmchr in chrom:
