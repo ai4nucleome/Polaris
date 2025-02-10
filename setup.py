@@ -1,8 +1,8 @@
 # My code has references to the following repositories:
-# RefHiC: https://github.com/BlanchetteLab/RefHiC
-# Axial Attention: https://github.com/lucidrains/axial-attention
+# RefHiC: https://github.com/BlanchetteLab/RefHiC（Analysis code）
+# Axial Attention: https://github.com/lucidrains/axial-attention (Model architecture)
+# Peakachu: https://github.com/tariks/peakachu (Calculate intra reads)
 # Thanks a lot for their implement.
-# --------------------------------------------------------
 
 """
 Setup script for Polaris.

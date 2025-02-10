@@ -1,3 +1,6 @@
+# Modified from RefHiC: https://github.com/BlanchetteLab/RefHiC（Analysis code）
+# --------------------------------------------------------------
+
 import click
 import cooler
 import h5py

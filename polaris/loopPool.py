@@ -7,8 +7,6 @@ from tqdm import tqdm
 
 def rhoDelta(data,resol,dc,radius): 
     
-    print(data.iloc[0,0])
-    print(data.shape)
     pos = data[[1, 4]].to_numpy() // resol
     posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
     NNindexes, NNdists = posTree.query_radius(pos, r=radius, return_distance=True)
@@ -21,8 +19,6 @@ def rhoDelta(data,resol,dc,radius):
     pos = data[[1, 4]].to_numpy() // resol
     val = data[6].to_numpy()
 
-    print(data.shape)
-    print()
     try:
         posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
         NNindexes, NNdists = posTree.query_radius(pos, r=dc, return_distance=True)
@@ -86,7 +82,6 @@ def pool(distance_cutoff,candidates,resol,mindelta,threshold,output,radius,refin
     
     data = pd.read_csv(candidates, sep='\t', header=None)
     
-    print(data.shape)
 
     if data.shape[0] == 0:
         print("#"*88,'\n#')
@@ -95,7 +90,6 @@ def pool(distance_cutoff,candidates,resol,mindelta,threshold,output,radius,refin
         sys.exit(1)
     data = data[data[6] > threshold].reset_index(drop=True)
     data = data[data[4] - data[1] > 11*resol].reset_index(drop=True)
-    print(data.shape)
     if data.shape[0] == 0:
         print("#"*88,'\n#')
         print("#\033[91m Error!!! The data is too sparse. Please decrease: [threshold] (minimum: 0.5).\033[0m\n#")

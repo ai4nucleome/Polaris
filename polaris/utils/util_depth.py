@@ -1,3 +1,6 @@
+# Modified from Peakachu: https://github.com/tariks/peakachu, but more fast
+# -------------------------------------------------------------------------
+
 import click
 import cooler
 import numpy as np
@@ -16,7 +19,6 @@ def depth(input, resol, mindis, chrom):
     print(f'\npolaris util depth START :)')
     totals = 0
     C = cooler.Cooler(f"{input}::resolutions/{resol}")
-    mindis = mindis // C.binsize
 
     if chrom is None:
         chrom =C.chromnames
