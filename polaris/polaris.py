@@ -11,6 +11,7 @@ from polaris.loopPool import pool
 from polaris.loop import pred
 from polaris.utils.util_cool2bcool import cool2bcool
 from polaris.utils.util_pileup import pileup
+from polaris.utils.util_depth import depth
 
 @click.group()
 def cli():
@@ -43,6 +44,7 @@ loop.add_command(score)
 loop.add_command(dev)
 loop.add_command(pool)
 
+util.add_command(depth)
 util.add_command(cool2bcool)
 util.add_command(pileup)
 
