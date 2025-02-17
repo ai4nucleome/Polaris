@@ -26,7 +26,7 @@ def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance
     """Predict loop score for each pixel in the input contact map
     """
     print('\npolaris loop score START :) ')
-    
+
     center_size = image // 2
     start_idx = (image - center_size) // 2
     end_idx = (image + center_size) // 2
@@ -69,7 +69,7 @@ def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance
     else:
         chrom = chrom.split(',')
         
-    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX']: # 'Y','chrY','X','chrX'
+    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX','chrW','W','chrZ','Z']: # 'Y','chrY','X','chrX'
         if rmchr in chrom:
             chrom.remove(rmchr)    
                   
@@ -92,13 +92,17 @@ def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance
         model = nn.DataParallel(model, device_ids=gpu) 
     model.eval()
         
-    chrom = tqdm(chrom, dynamic_ncols=True)
-    for _chrom in chrom:
+    badc=[]
+    chrom_ = tqdm(chrom, dynamic_ncols=True)
+    for _chrom in chrom_:
         test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity)
         test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=workers,prefetch_factor=4,pin_memory=(gpu is not None))
         
-        chrom.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"
-              
+        chrom_.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"
+        
+        if len(test_data) == 0:
+            badc.append(_chrom)
+            
         with torch.no_grad():
             for X in test_dataloader:
                 bin_i,bin_j,targetX=X
@@ -113,7 +117,12 @@ def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance
 
                 loopwriter.write(_chrom,frag1,frag2,prob)   
     
-    print(f'\npolaris loop score FINISHED :)\nLoopscore file saved at {output}')           
-
+    if len(badc)==len(chrom):
+        raise ValueError("polaris loop score FAILED :( \nThe '-s' value needs to be increased for more sparse data.")
+    else:
+        print(f'\npolaris loop score FINISHED :)\nLoopscore file saved at {output}')  
+        if len(badc)>0:
+            print(f"But the size of {badc} are too small or their contact matrix are too sparse.\nYou may need to check the data or run these chr respectively by increasing -s.")         
+    
 if __name__ == '__main__':
     score()

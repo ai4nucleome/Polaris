@@ -16,53 +16,56 @@ def rhoDelta(data,resol,dc,radius):
     _l=np.asarray(_l)
     data = data[_l>5].reset_index(drop=True)
     
-    pos = data[[1, 4]].to_numpy() // resol
-    val = data[6].to_numpy()
+    if data.shape[0] != 0:
+        pos = data[[1, 4]].to_numpy() // resol
+        val = data[6].to_numpy()
 
-    try:
-        posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
-        NNindexes, NNdists = posTree.query_radius(pos, r=dc, return_distance=True)
-    except ValueError as e:
-        if "Found array with 0 sample(s)" in str(e):
-            print("#"*88,'\n#')
-            print("#\033[91m Error!!! The data is too sparse. Please decrease the value of: [t]\033[0m\n#")
-            print("#"*88,'\n')
-            sys.exit(1)
-        else:
-            raise
+        try:
+            posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
+            NNindexes, NNdists = posTree.query_radius(pos, r=dc, return_distance=True)
+        except ValueError as e:
+            if "Found array with 0 sample(s)" in str(e):
+                print("#"*88,'\n#')
+                print("#\033[91m Error!!! The data is too sparse. Please decrease the value of: [t]\033[0m\n#")
+                print("#"*88,'\n')
+                sys.exit(1)
+            else:
+                raise
 
-    rhos = []
-    for i in range(len(NNindexes)):
-        rhos.append(np.dot(np.exp(-(NNdists[i] / dc) ** 2), val[NNindexes[i]]))
-    rhos = np.asarray(rhos)
+        rhos = []
+        for i in range(len(NNindexes)):
+            rhos.append(np.dot(np.exp(-(NNdists[i] / dc) ** 2), val[NNindexes[i]]))
+        rhos = np.asarray(rhos)
 
-    _r = 100
-    _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
-    deltas = rhos * 0
-    LargerNei = rhos * 0 - 1
-    for i in range(len(_indexes)):
-        idx = np.argwhere(rhos[_indexes[i]] > rhos[_indexes[i][0]])
-        if idx.shape[0] == 0:
-            deltas[i] = _dists[i][-1] + 1
-        else:
-            LargerNei[i] = _indexes[i][idx[0]]
-            deltas[i] = _dists[i][idx[0]]
-    failed = np.argwhere(LargerNei == -1).flatten()
-    while len(failed) > 1 and _r < 100000:
-        _r = _r * 10
-        _indexes, _dists = posTree.query_radius(pos[failed], r=_r, return_distance=True, sort_results=True)
+        _r = 100
+        _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
+        deltas = rhos * 0
+        LargerNei = rhos * 0 - 1
         for i in range(len(_indexes)):
             idx = np.argwhere(rhos[_indexes[i]] > rhos[_indexes[i][0]])
             if idx.shape[0] == 0:
-                deltas[failed[i]] = _dists[i][-1] + 1
+                deltas[i] = _dists[i][-1] + 1
             else:
-                LargerNei[failed[i]] = _indexes[i][idx[0]]
-                deltas[failed[i]] = _dists[i][idx[0]]
+                LargerNei[i] = _indexes[i][idx[0]]
+                deltas[i] = _dists[i][idx[0]]
         failed = np.argwhere(LargerNei == -1).flatten()
+        while len(failed) > 1 and _r < 100000:
+            _r = _r * 10
+            _indexes, _dists = posTree.query_radius(pos[failed], r=_r, return_distance=True, sort_results=True)
+            for i in range(len(_indexes)):
+                idx = np.argwhere(rhos[_indexes[i]] > rhos[_indexes[i][0]])
+                if idx.shape[0] == 0:
+                    deltas[failed[i]] = _dists[i][-1] + 1
+                else:
+                    LargerNei[failed[i]] = _indexes[i][idx[0]]
+                    deltas[failed[i]] = _dists[i][idx[0]]
+            failed = np.argwhere(LargerNei == -1).flatten()
 
-    data['rhos']=rhos
-    data['deltas']=deltas
-
+        data['rhos']=rhos
+        data['deltas']=deltas
+    else:
+        data['rhos']=[]
+        data['deltas']=[]
     return data
 
 
@@ -79,9 +82,10 @@ def pool(distance_cutoff,candidates,resol,mindelta,threshold,output,radius,refin
     """Call loops from loop candidates by clustering
     """
     print('\npolaris loop pool START :) ')
-    
+
     data = pd.read_csv(candidates, sep='\t', header=None)
     
+    ccs = set(data.iloc[:,0])
 
     if data.shape[0] == 0:
         print("#"*88,'\n#')
@@ -159,7 +163,16 @@ def pool(distance_cutoff,candidates,resol,mindelta,threshold,output,radius,refin
     loopPd=pd.concat(loopPds).sort_values(6,ascending=False)
     loopPd[[1, 2, 4, 5]] = loopPd[[1, 2, 4, 5]].astype(int)
     loopPd[[0,1,2,3,4,5,6]].to_csv(output,sep='\t',header=False, index=False)
-    print(f'\npolaris loop score FINISHED :)\n{len(loopPd)} loops saved to {output}')
-
+    
+    ccs_ = set(loopPd.iloc[:,0])
+    badc = ccs.difference(ccs_)
+    if len(badc) == len(ccs):
+        raise ValueError("polaris loop pool FAILED :(\nPlease check input and mcool file to yield scoreFile. Or use higher '-s' value for more sparse mcool data.")
+    else:
+        print(f'\npolaris loop pool FINISHED :)\n{len(loopPd)} loops saved to {output}')
+        if len(badc) > 0:
+            print(f"But the loop score of {badc} are too sparse.\nYou may need to check the mcool data or re-run polaris loop score by increasing -s.")         
+            
+    
 if __name__ == '__main__':
     pool()

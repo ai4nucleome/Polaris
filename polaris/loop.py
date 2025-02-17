@@ -26,56 +26,61 @@ def rhoDelta(data,resol,dc,radius):
     _l=np.asarray(_l)
     data = data[_l>5].reset_index(drop=True)
     
-    pos = data[[1, 4]].to_numpy() // resol
-    val = data[6].to_numpy()
+    if data.shape[0] != 0:
+        pos = data[[1, 4]].to_numpy() // resol
+        val = data[6].to_numpy()
 
-    try:
-        posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
-        NNindexes, NNdists = posTree.query_radius(pos, r=dc, return_distance=True)
-    except ValueError as e:
-        if "Found array with 0 sample(s)" in str(e):
-            print("#"*88,'\n#')
-            print("#\033[91m Error!!! The data is too sparse. Please increase the value of: [t]\033[0m\n#")
-            print("#"*88,'\n')
-            sys.exit(1)
-        else:
-            raise
+        try:
+            posTree = KDTree(pos, leaf_size=30, metric='chebyshev')
+            NNindexes, NNdists = posTree.query_radius(pos, r=dc, return_distance=True)
+        except ValueError as e:
+            if "Found array with 0 sample(s)" in str(e):
+                print("#"*88,'\n#')
+                print("#\033[91m Error!!! The data is too sparse. Please increase the value of: [t]\033[0m\n#")
+                print("#"*88,'\n')
+                sys.exit(1)
+            else:
+                raise
 
-    rhos = []
-    for i in range(len(NNindexes)):
-        rhos.append(np.dot(np.exp(-(NNdists[i] / dc) ** 2), val[NNindexes[i]]))
-    rhos = np.asarray(rhos)
+        rhos = []
+        for i in range(len(NNindexes)):
+            rhos.append(np.dot(np.exp(-(NNdists[i] / dc) ** 2), val[NNindexes[i]]))
+        rhos = np.asarray(rhos)
 
-    _r = 100
-    _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
-    deltas = rhos * 0
-    LargerNei = rhos * 0 - 1
-    for i in range(len(_indexes)):
-        idx = np.argwhere(rhos[_indexes[i]] > rhos[_indexes[i][0]])
-        if idx.shape[0] == 0:
-            deltas[i] = _dists[i][-1] + 1
-        else:
-            LargerNei[i] = _indexes[i][idx[0]]
-            deltas[i] = _dists[i][idx[0]]
-    failed = np.argwhere(LargerNei == -1).flatten()
-    while len(failed) > 1 and _r < 100000:
-        _r = _r * 10
-        _indexes, _dists = posTree.query_radius(pos[failed], r=_r, return_distance=True, sort_results=True)
+        _r = 100
+        _indexes, _dists = posTree.query_radius(pos, r=_r, return_distance=True, sort_results=True)
+        deltas = rhos * 0
+        LargerNei = rhos * 0 - 1
         for i in range(len(_indexes)):
             idx = np.argwhere(rhos[_indexes[i]] > rhos[_indexes[i][0]])
             if idx.shape[0] == 0:
-                deltas[failed[i]] = _dists[i][-1] + 1
+                deltas[i] = _dists[i][-1] + 1
             else:
-                LargerNei[failed[i]] = _indexes[i][idx[0]]
-                deltas[failed[i]] = _dists[i][idx[0]]
+                LargerNei[i] = _indexes[i][idx[0]]
+                deltas[i] = _dists[i][idx[0]]
         failed = np.argwhere(LargerNei == -1).flatten()
+        while len(failed) > 1 and _r < 100000:
+            _r = _r * 10
+            _indexes, _dists = posTree.query_radius(pos[failed], r=_r, return_distance=True, sort_results=True)
+            for i in range(len(_indexes)):
+                idx = np.argwhere(rhos[_indexes[i]] > rhos[_indexes[i][0]])
+                if idx.shape[0] == 0:
+                    deltas[failed[i]] = _dists[i][-1] + 1
+                else:
+                    LargerNei[failed[i]] = _indexes[i][idx[0]]
+                    deltas[failed[i]] = _dists[i][idx[0]]
+            failed = np.argwhere(LargerNei == -1).flatten()
 
-    data['rhos']=rhos
-    data['deltas']=deltas
+        data['rhos']=rhos
+        data['deltas']=deltas
+    else:
+        data['rhos']=[]
+        data['deltas']=[]
 
     return data
 
 def pool(data,dc,resol,mindelta,t,output,radius,refine=True):
+    ccs = set(data.iloc[:,0])
     
     if data.shape[0] == 0:
         print("#"*88,'\n#')
@@ -154,7 +159,10 @@ def pool(data,dc,resol,mindelta,t,output,radius,refine=True):
     loopPd[[1, 2, 4, 5]] = loopPd[[1, 2, 4, 5]].astype(int)
     loopPd[[0,1,2,3,4,5,6]].to_csv(output,sep='\t',header=False, index=False)
 
-    return len(loopPd)
+    ccs_ = set(loopPd.iloc[:,0])
+    badc = ccs.difference(ccs_)
+    
+    return len(loopPd),badc,ccs
     
     
 @click.command()
@@ -176,7 +184,7 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
     """Predict loops from input contact map directly
     """
     print('\npolaris loop pred START :)')
-    
+
     center_size = image // 2
     start_idx = (image - center_size) // 2
     end_idx = (image + center_size) // 2
@@ -219,7 +227,7 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
     else:
         chrom = chrom.split(',')
         
-    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX']: # 'Y','chrY','X','chrX'
+    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX','chrW','W','chrZ','Z']: # 'Y','chrY','X','chrX'
         if rmchr in chrom:
             chrom.remove(rmchr)    
                   
@@ -241,14 +249,20 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
     if not cpu and len(gpu) > 1:
         model = nn.DataParallel(model, device_ids=gpu) 
     model.eval()
-        
-    chrom = tqdm(chrom, dynamic_ncols=True)
-    for _chrom in chrom:
+    
+    print('\n********score START********')
+   
+    badc=[]    
+    chrom_ = tqdm(chrom, dynamic_ncols=True)
+    for _chrom in chrom_:
         test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity)
         test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=workers,prefetch_factor=4,pin_memory=(gpu is not None))
         
-        chrom.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"
-              
+        chrom_.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"
+           
+        if len(test_data)==0:
+            badc.append(_chrom) 
+
         with torch.no_grad():
             for X in test_dataloader:
                 bin_i,bin_j,targetX=X
@@ -266,8 +280,23 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
                         results.append([_chrom, frag1[i], frag1[i] + resol, 
                                         _chrom, frag2[i], frag2[i] + resol, 
                                         prob[i]])
+    if len(badc)==len(chrom):
+        raise ValueError("score FAILED :(\nThe '-s' value needs to be increased for more sparse data.")
+    else:
+        print(f'********score FINISHED********')  
+        if len(badc)>0:
+            print(f"· But the size of {badc} are too small or their contact matrix are too sparse.\n· You may need to check the data or run these chr respectively by increasing -s.")         
+        print(f'********pool START********')  
+
     df = pd.DataFrame(results)
-    loopNum = pool(df,distance_cutoff,resol,mindelta,threshold,output,radius)
+    loopNum,badcp,ccs = pool(df,distance_cutoff,resol,mindelta,threshold,output,radius)
+    if len(badcp) == len(ccs):
+        raise ValueError("pool FAILED :(\nPlease check input and mcool file to yield scoreFile. Or use higher '-s' value for more sparse mcool data.")
+    else:
+        print(f'********pool FINISHED********')
+        if len(badcp) > 0:
+            print(f"· But the loop score of {badcp} are too sparse.\n· You may need to check the mcool data or re-run polaris loop score by increasing -s.")         
+    
     
     print(f'\npolaris loop pred FINISHED :)\n{loopNum} loops saved to {output}')
             

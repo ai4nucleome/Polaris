@@ -9,7 +9,7 @@ np.seterr(divide='ignore', invalid='ignore')
 
 @click.command()
 @click.option('-c','--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
-@click.option('-md','--mindis', type=int, default=0, help='Only count reads with genomic distance (in bins) greater than this value. [0]')
+@click.option('-md','--mindis', type=int, default=11, help='Only count reads with genomic distance >= this value (in bins). [11]')
 @click.option('-r','--resol',type=int,default=5000,help ='Resolution [5000]')
 @click.option('-i','--input', type=str,required=True,help='mcool file path')
 def depth(input, resol, mindis, chrom):
@@ -24,7 +24,7 @@ def depth(input, resol, mindis, chrom):
         chrom =C.chromnames
     else:
         chrom = chrom.split(',')
-    print(f"Calculating depth for {chrom}")
+    # print(f"Calculating depth for {chrom}")
     
     chrom_ = tqdm(chrom, dynamic_ncols=True)
     for cc in chrom_:
