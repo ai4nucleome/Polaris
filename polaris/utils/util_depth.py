@@ -1,67 +1,57 @@
-# Modified from Peakachu: https://github.com/tariks/peakachu, but more fast
-# -------------------------------------------------------------------------
-
 import click
 import cooler
 import numpy as np
-from tqdm import tqdm 
+from tqdm import tqdm
+from multiprocessing import Pool
+
 np.seterr(divide='ignore', invalid='ignore')
+
+def process_chrom(args):
+    chrom_name, input_file, resol, mindis, exclude_self = args
+    try:
+        C = cooler.Cooler(f"{input_file}::resolutions/{resol}")
+        pixels = C.matrix(
+            balance=False, sparse=True, as_pixels=True).fetch(chrom_name)
+        bin_diff = pixels['bin2_id'] - pixels['bin1_id']
+        min_diff = max(mindis, 1) if exclude_self else mindis
+        mask = bin_diff >= min_diff
+        return pixels[mask]['count'].sum()
+    except Exception as e:
+        print(f"Error processing {chrom_name}: {e}")
+        return 0
 
 @click.command()
 @click.option('-c','--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
-@click.option('-md','--mindis', type=int, default=11, help='Only count reads with genomic distance >= this value (in bins). [11]')
-@click.option('-r','--resol',type=int,default=5000,help ='Resolution [5000]')
+@click.option('-md','--mindis', type=int, default=0, help='Min genomic distance in bins [0]')
+@click.option('-r','--resol',type=int,required=True,help='Resolution (bp)')
 @click.option('-i','--input', type=str,required=True,help='mcool file path')
-def depth(input, resol, mindis, chrom):
-    """Calculate intra reads of mcool file
-    """
-       
-    print(f'\npolaris util depth START :)')
-    totals = 0
-    C = cooler.Cooler(f"{input}::resolutions/{resol}")
-
-    if chrom is None:
-        chrom =C.chromnames
-    else:
-        chrom = chrom.split(',')
-    # print(f"Calculating depth for {chrom}")
+@click.option('--exclude-self', is_flag=True, help='Exclude bin_diff=0 contacts')
+def depth(input, resol, mindis, chrom, exclude_self):
+    """Calculate intra-chromosomal contacts with bin distance >= mindis"""
+    print(f'\n[polaris] Depth calculation START')
     
-    chrom_ = tqdm(chrom, dynamic_ncols=True)
-    for cc in chrom_:
-        ccdepth = 0
-        intra = C.matrix(balance=False, sparse=True, as_pixels=True).fetch(cc)
-        ccdepth+=intra[intra['bin2_id']-intra['bin1_id']>mindis]['count'].sum()*2
-        if mindis == 0:
-            ccdepth+=intra[intra['bin2_id']-intra['bin1_id']==mindis]['count'].sum()
-        else:
-            ccdepth+=intra[intra['bin2_id']-intra['bin1_id']==mindis]['count'].sum()*2
-        chrom_.desc = f'Depth of {cc}: {ccdepth}'
-        totals += ccdepth
-    print(f'\npolaris util depth FINISHED :)\nScaned {chrom} of {input} ({resol}bp)\nIntra reads: {totals:,}')
-
+    try:
+        C = cooler.Cooler(f"{input}::resolutions/{resol}")
+    except ValueError:
+        available_res = cooler.fileops.list_coolers(input)
+        raise ValueError(f"Resolution {resol} not found. Available: {available_res}")
     
-    # print('num of intra reads in your data:', totals)
-    # matched_read_num = 3031042417 / genome_size * totals
-    # print('num of intra reads in a human with matched sequencing coverage:', int(matched_read_num))
-    # print('suggested model:', match_pretrained_models(matched_read_num))
+    chrom_list = chrom.split(',') if chrom else C.chromnames
+    invalid_chroms = [c for c in chrom_list if c not in C.chromnames]
+    if invalid_chroms:
+        raise ValueError(f"Invalid chromosomes: {invalid_chroms}. Valid: {C.chromnames}")
+    
+    # 并行处理
+    with Pool(processes=min(len(chrom_list), 4)) as pool:
+        args_list = [(chrom, input, resol, mindis, exclude_self) for chrom in chrom_list]
+        results = list(tqdm(pool.imap(process_chrom, args_list), total=len(chrom_list), dynamic_ncols=True))
+        total_contacts = sum(results)
+    
+    print(f"\n[polaris] Depth calculation FINISHED")
+    print(f"File: {input} (res={resol}bp)")
+    print(f"Chromosomes: {chrom_list}")
+    print(f"Minimum bin distance: {mindis}{', exclude self' if exclude_self else ''}")
+    print(f"Total intra contacts: {total_contacts:,}")
 
-# def match_pretrained_models(v, platform='Hi-C'):
-
-#     if platform in ['Hi-C', 'Micro-C']:
-#         arr = [
-#             5000000, 10000000, 30000000, 50000000, 100000000,
-#             150000000, 200000000, 250000000, 300000000, 350000000,
-#             400000000, 450000000, 500000000, 550000000, 600000000,
-#             650000000, 700000000, 750000000, 800000000, 850000000,
-#             900000000, 1000000000, 1200000000, 1400000000, 1600000000,
-#             1800000000, 2000000000
-#         ]
-
-#     diff = np.abs(v - np.r_[arr])
-#     idx = np.argmin(diff)
-#     if arr[idx] >= 1000000000:
-#         label = '{0:.2g} billion'.format(arr[idx]/1000000000)
-#     else:
-#         label = '{0} million'.format(arr[idx]//1000000)
-
-#     return label
+if __name__ == '__main__':
+    depth()
