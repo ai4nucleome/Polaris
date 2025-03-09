@@ -20,9 +20,10 @@ from polaris.utils.util_data import centerPredCoolDataset
 @click.option('-s','--sparsity', type=float, default=0.9, help='Allowed sparsity of submatrices [0.9]')
 @click.option('-md','--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs [3000000]')
 @click.option('-r','--resol',type=int,default=5000,help ='Resolution [5000]')
+@click.option('--raw',type=bool,default=False,help ='Raw matrix or balanced matrix')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loop candidates')
-def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance, resol, input, output, image=224):
+def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance, resol, input, output, raw, image=224):
     """Predict loop score for each pixel in the input contact map
     """
     print('\npolaris loop score START :) ')
@@ -69,9 +70,9 @@ def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance
     else:
         chrom = chrom.split(',')
         
-    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX','chrW','W','chrZ','Z']: # 'Y','chrY','X','chrX'
-        if rmchr in chrom:
-            chrom.remove(rmchr)    
+    # for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX','chrW','W','chrZ','Z']: # 'Y','chrY','X','chrX'
+    #     if rmchr in chrom:
+    #         chrom.remove(rmchr)    
                   
     print(f"Analysing chroms: {chrom}")
     
@@ -95,7 +96,7 @@ def score(batchsize, cpu, gpu, chrom, workers, threshold, sparsity, max_distance
     badc=[]
     chrom_ = tqdm(chrom, dynamic_ncols=True)
     for _chrom in chrom_:
-        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity)
+        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity,raw=raw)
         test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=workers,prefetch_factor=4,pin_memory=(gpu is not None))
         
         chrom_.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"

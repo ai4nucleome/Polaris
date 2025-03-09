@@ -75,14 +75,14 @@ def shuffleIF(df):
     return df
 
 class centerPredCoolDataset(Dataset):
-    def __init__(self, coolfile, cchrom, step=224, w=224, max_distance_bin=600, decoy=False, restrictDecoy=False, s=0.9):
+    def __init__(self, coolfile, cchrom, step=224, w=224, max_distance_bin=600, decoy=False, restrictDecoy=False, s=0.9, raw=False):
         '''
         Args:
             step (int): the step of slide window moved and also the center crop size to predict 
         '''
         
         self.s=s
-        oeMat, decoyOeMat, N = self._processCoolFile(coolfile, cchrom, decoy=decoy, restrictDecoy=restrictDecoy)
+        oeMat, decoyOeMat, N = self._processCoolFile(coolfile, cchrom, decoy=decoy, restrictDecoy=restrictDecoy, raw=raw)
         self.data, self.i, self.j = self._prepare_data(oeMat, N, step, w, max_distance_bin, decoyOeMat)
         del oeMat, decoyOeMat
 
@@ -118,17 +118,23 @@ class centerPredCoolDataset(Dataset):
                 j_list.append(jj + joffset)
         return data, i_list, j_list
     
-    def _processCoolFile(self, coolfile, cchrom, decoy=False, restrictDecoy=False):
+    def _processCoolFile(self, coolfile, cchrom, decoy=False, restrictDecoy=False, raw=False):
         extent = coolfile.extent(cchrom)
         N = extent[1] - extent[0]
-        ccdata = coolfile.matrix(balance=True, sparse=True, as_pixels=True).fetch(cchrom)
-        ccdata['balanced'] = ccdata['balanced'].fillna(0)
+        if raw:
+            ccdata = coolfile.matrix(balance=False, sparse=True, as_pixels=True).fetch(cchrom)
+            v='count'
+        else:
+            ccdata = coolfile.matrix(balance=True, sparse=True, as_pixels=True).fetch(cchrom)
+            v='balanced'
         ccdata['bin1_id'] -= extent[0]
         ccdata['bin2_id'] -= extent[0]
             
         ccdata['distance'] = ccdata['bin2_id'] - ccdata['bin1_id']
-        d_means = ccdata.groupby('distance')['balanced'].transform('mean')
-        ccdata['oe'] = ccdata['balanced'] / d_means
+        d_means = ccdata.groupby('distance')[v].transform('mean')
+        ccdata[v] = ccdata[v].fillna(0)
+        
+        ccdata['oe'] = ccdata[v] / d_means
         ccdata['oe'] = ccdata['oe'].fillna(0)
         ccdata['oe'] = ccdata['oe'] / ccdata['oe'].max()
         oeMat = upperCoo2symm(ccdata['bin1_id'].ravel(), ccdata['bin2_id'].ravel(), ccdata['oe'].ravel(), N)

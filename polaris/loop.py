@@ -178,9 +178,10 @@ def pool(data,dc,resol,mindelta,t,output,radius,refine=True):
 @click.option('-dc','--distance_cutoff', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
 @click.option('-R','--radius', type=int, default=2, help='Radius threshold to remove outliers. [2]')
 @click.option('-d','--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
+@click.option('--raw',type=bool,default=False,help ='Raw matrix or balanced matrix')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loops')
-def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance, resol, distance_cutoff, radius, mindelta, input, output, image=224):
+def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance, resol, distance_cutoff, radius, mindelta, input, output, raw, image=224):
     """Predict loops from input contact map directly
     """
     print('\npolaris loop pred START :)')
@@ -215,7 +216,7 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
             cpu = True
             print('GPU is not available!')
             print('Using CPU mode... (This may take significantly longer than using GPU mode.)')
-            
+           
 
     coolfile = cooler.Cooler(input + '::/resolutions/' + str(resol))
     modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
@@ -227,9 +228,9 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
     else:
         chrom = chrom.split(',')
         
-    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX','chrW','W','chrZ','Z']: # 'Y','chrY','X','chrX'
-        if rmchr in chrom:
-            chrom.remove(rmchr)    
+    # for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX','chrW','W','chrZ','Z']: # 'Y','chrY','X','chrX'
+    #     if rmchr in chrom:
+    #         chrom.remove(rmchr)    
                   
     print(f"Analysing chroms: {chrom}")
     
@@ -252,17 +253,17 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
     
     print('\n********score START********')
    
-    badc=[]    
+    badc=[]
     chrom_ = tqdm(chrom, dynamic_ncols=True)
     for _chrom in chrom_:
-        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity)
+        test_data = centerPredCoolDataset(coolfile,_chrom,max_distance_bin=max_distance//resol,w=image,step=center_size,s=sparsity,raw=raw)
         test_dataloader = DataLoader(test_data, batch_size=batchsize, shuffle=False,num_workers=workers,prefetch_factor=4,pin_memory=(gpu is not None))
         
         chrom_.desc = f"[Analyzing {_chrom} with {len(test_data)} submatrices]"
-           
-        if len(test_data)==0:
-            badc.append(_chrom) 
-
+        
+        if len(test_data) == 0:
+            badc.append(_chrom)
+            
         with torch.no_grad():
             for X in test_dataloader:
                 bin_i,bin_j,targetX=X
@@ -276,7 +277,8 @@ def pred(batchsize, cpu, gpu, chrom, threshold, sparsity, workers, max_distance,
                     frag2 = bin_j[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
 
                 for i in range(len(frag1)):                    
-                    if frag1[i] < frag2[i] and frag2[i]-frag1[i] > 11*resol and frag2[i]-frag1[i] < max_distance:
+                    # if frag1[i] < frag2[i] and frag2[i]-frag1[i] > 11*resol and frag2[i]-frag1[i] < max_distance:
+                    if frag1[i] < frag2[i] and frag2[i]-frag1[i] < max_distance:
                         results.append([_chrom, frag1[i], frag1[i] + resol, 
                                         _chrom, frag2[i], frag2[i] + resol, 
                                         prob[i]])
