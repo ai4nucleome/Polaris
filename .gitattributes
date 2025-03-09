@@ -1,3 +1,0 @@
-*.pt filter=lfs diff=lfs merge=lfs -text
-*.bcool filter=lfs diff=lfs merge=lfs -text
-*.mcool filter=lfs diff=lfs merge=lfs -text
