@@ -4,3 +4,5 @@ docs/*
 polaris.egg-info/*
 polaris/**/__pycache__/
 requirements.txt
+*.bcool
+*.pt
