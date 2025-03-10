@@ -10,6 +10,11 @@ You can re-run **Polaris** to reproduce these results by following the commands 
 
 ## Loop Prediction on GM12878 (250M Valid Read Pairs)
 
+You can download example data from the [Hugging Face repo of Polaris](https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true) by runing:
+```bash
+wget https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true -O "./GM12878_250M.bcool"
+```
+And run following code to annotate loops from the example data:
 ```bash
 polaris loop pred --chrom chr15,chr16,chr17 -i ./loop_annotation/GM12878_250M.bcool -o ./loop_annotation/GM12878_250M_chr151617_loops.bedpe
 ```

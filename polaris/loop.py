@@ -36,7 +36,7 @@ def rhoDelta(data,resol,dc,radius):
         except ValueError as e:
             if "Found array with 0 sample(s)" in str(e):
                 print("#"*88,'\n#')
-                print("#\033[91m Error!!! The data is too sparse. Please increase the value of: [t]\033[0m\n#")
+                print("#\033[91m Error!!! The data is too sparse. Please decrease the value of: [t]\033[0m\n#")
                 print("#"*88,'\n')
                 sys.exit(1)
             else:
@@ -76,12 +76,11 @@ def rhoDelta(data,resol,dc,radius):
     else:
         data['rhos']=[]
         data['deltas']=[]
-
     return data
 
 def pool(data,dc,resol,mindelta,t,output,radius,refine=True):
     ccs = set(data.iloc[:,0])
-    
+
     if data.shape[0] == 0:
         print("#"*88,'\n#')
         print("#\033[91m Error!!! The file is empty. Please check your file.\033[0m\n#")

@@ -56,7 +56,7 @@ You can also download model's weights file manually from [there](https://hugging
 The installation requires network access to download libraries. Usually, the installation will finish within 3 minutes. The installation time is longer if network access is slow and/or unstable.
 
 ## Quick Start for Loop Annotation
-For detailed documentation or parameter setting, please run:
+**For detailed documentation or parameter setting, please run:**
 ```bash
 polaris --help
 ```

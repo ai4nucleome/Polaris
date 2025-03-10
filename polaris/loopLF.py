@@ -191,9 +191,9 @@ def scorelf(batchsize, cpu, gpu, chrom, threshold, sparsity, max_distance, resol
                 i_list = i_list[batchsize:]
                 j_list = j_list[batchsize:]
 
-                print(targetX.shape)
-                print(bin_i.shape)
-                print(bin_j.shape)
+                # print(targetX.shape)
+                # print(bin_i.shape)
+                # print(bin_j.shape)
 
                 with torch.no_grad():
                     with autocast():
