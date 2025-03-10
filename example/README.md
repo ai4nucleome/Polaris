@@ -12,7 +12,7 @@ You can re-run **Polaris** to reproduce these results by following the commands 
 
 You can download example data from the [Hugging Face repo of Polaris](https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true) by runing:
 ```bash
-wget https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true -O "./GM12878_250M.bcool"
+wget https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true -O "./loop_annotation/GM12878_250M.bcool"
 ```
 And run following code to annotate loops from the example data:
 ```bash
