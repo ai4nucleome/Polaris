@@ -52,17 +52,23 @@ def upperCoo2symm(row,col,data,N=None):
     symm.setdiag(diagVal)
     return symm
 
-def processCoolFile(coolfile, cchrom):
+def processCoolFile(coolfile, cchrom, raw=False):
     extent = coolfile.extent(cchrom)
     N = extent[1] - extent[0]
-    ccdata = coolfile.matrix(balance=True, sparse=True, as_pixels=True).fetch(cchrom)
-    ccdata['balanced'] = ccdata['balanced'].fillna(0)
+    if raw:
+        ccdata = coolfile.matrix(balance=False, sparse=True, as_pixels=True).fetch(cchrom)
+        v='count'
+    else:
+        ccdata = coolfile.matrix(balance=True, sparse=True, as_pixels=True).fetch(cchrom)
+        v='balanced'
     ccdata['bin1_id'] -= extent[0]
     ccdata['bin2_id'] -= extent[0]
         
     ccdata['distance'] = ccdata['bin2_id'] - ccdata['bin1_id']
-    d_means = ccdata.groupby('distance')['balanced'].transform('mean')
-    ccdata['oe'] = ccdata['balanced'] / d_means
+    d_means = ccdata.groupby('distance')[v].transform('mean')
+    ccdata[v] = ccdata[v].fillna(0)
+    
+    ccdata['oe'] = ccdata[v] / d_means
     ccdata['oe'] = ccdata['oe'].fillna(0)
     ccdata['oe'] = ccdata['oe'] / ccdata['oe'].max()
     oeMat = upperCoo2symm(ccdata['bin1_id'].ravel(), ccdata['bin2_id'].ravel(), ccdata['oe'].ravel(), N)
@@ -70,29 +76,27 @@ def processCoolFile(coolfile, cchrom):
     return oeMat, N
 
 @click.command()
-@click.option('--batchsize', type=int, default=16, help='Batch size [16]')
-@click.option('--cpu', type=bool, default=False, help='Use CPU [False]')
-@click.option('--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
-@click.option('--chrom', type=str, default=None, help='Comma separated chroms')
-@click.option('--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs')
-@click.option('--resol',type=int,default=500,help ='Resolution')
-@click.option('--image',type=int,default=1024,help ='Resolution')
-@click.option('--center_size',type=int,default=224,help ='Resolution')
+@click.option('-b','--batchsize', type=int, default=128, help='Batch size [128]')
+@click.option('-C','--cpu', type=bool, default=False, help='Use CPU [False]')
+@click.option('-G','--gpu', type=str, default=None, help='Comma-separated GPU indices [auto select]')
+@click.option('-c','--chrom', type=str, default=None, help='Comma separated chroms [all autosomes]')
+@click.option('-t','--threshold', type=float, default=0.5, help='Loop Score Threshold [0.5]')
+@click.option('-s','--sparsity', type=float, default=0.9, help='Allowed sparsity of submatrices [0.9]')
+@click.option('-md','--max_distance', type=int, default=3000000, help='Max distance (bp) between contact pairs [3000000]')
+@click.option('-r','--resol',type=int,default=5000,help ='Resolution [5000]')
+@click.option('--raw',type=bool,default=False,help ='Raw matrix or balanced matrix')
 @click.option('-i','--input', type=str,required=True,help='Hi-C contact map path')
 @click.option('-o','--output', type=str,required=True,help='.bedpe file path to save loop candidates')
-def dev(batchsize, cpu, gpu, chrom, max_distance, resol, input, output, image, center_size):
-    """ *development function* Coming soon...
+def scorelf(batchsize, cpu, gpu, chrom, threshold, sparsity, max_distance, resol, input, output, raw, image=224):
+    """ *development* Score Pixels for Very Large mcool (>30GB) ...
     """
-    print('polaris loop dev START :) ')
-    
-    # center_size = 224
-    # center_size = image // 2
+    print('\npolaris loop scorelf START :) ')
+
+    center_size = image // 2
     start_idx = (image - center_size) // 2
     end_idx = (image + center_size) // 2
     slice_obj_pred = (slice(None), slice(None), slice(start_idx, end_idx), slice(start_idx, end_idx))
     slice_obj_coord = (slice(None), slice(start_idx, end_idx), slice(start_idx, end_idx))
-    
-    max_distance_bin=max_distance//resol
 
     loopwriter = bedpewriter(output,resol,max_distance)
     
@@ -119,6 +123,7 @@ def dev(batchsize, cpu, gpu, chrom, max_distance, resol, input, output, image, c
             print('GPU is not available!')
             print('Using CPU mode... (This may take significantly longer than using GPU mode.)')
            
+
     coolfile = cooler.Cooler(input + '::/resolutions/' + str(resol))
     modelstate = str(files('polaris').joinpath('model/sft_loop.pt'))
     _modelstate = torch.load(modelstate, map_location=device.type)
@@ -128,10 +133,12 @@ def dev(batchsize, cpu, gpu, chrom, max_distance, resol, input, output, image, c
         chrom =coolfile.chromnames
     else:
         chrom = chrom.split(',')
-    for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX']: # 'Y','chrY','X','chrX'
-        if rmchr in chrom:
-            chrom.remove(rmchr)              
-    print(f"\nAnalysing chroms: {chrom}")
+        
+    # for rmchr in ['chrMT','MT','chrM','M','Y','chrY','X','chrX','chrW','W','chrZ','Z']: # 'Y','chrY','X','chrX'
+    #     if rmchr in chrom:
+    #         chrom.remove(rmchr)    
+
+    print(f"Analysing chroms: {chrom}")
     
     model = polarisnet(
             image_size=parameters['image_size'], 
@@ -150,27 +157,30 @@ def dev(batchsize, cpu, gpu, chrom, max_distance, resol, input, output, image, c
         model = nn.DataParallel(model, device_ids=gpu) 
     model.eval()
         
-    chrom = tqdm(chrom, dynamic_ncols=True)
-    for _chrom in chrom:
-        chrom.desc = f"[analyzing {_chrom}]"
+    badc=[]
+    chrom_ = tqdm(chrom, dynamic_ncols=True)
+    for _chrom in chrom_:
+        chrom_.desc = f"[Analyzing {_chrom}]"
 
-        oeMat, N = processCoolFile(coolfile, _chrom)
+        oeMat, N = processCoolFile(coolfile, _chrom, raw)
         start_point = -(image - center_size) // 2
         joffset = np.repeat(np.linspace(0, image, image, endpoint=False, dtype=int)[np.newaxis, :], image, axis=0)
         ioffset = np.repeat(np.linspace(0, image, image, endpoint=False, dtype=int)[:, np.newaxis], image, axis=1)
         data, i_list, j_list = [], [], []
-        
+        count=0
         for i in range(start_point, N - image - start_point, center_size):
-            for j in range(0, max_distance_bin, center_size):
+            for j in range(0, max_distance//resol, center_size):
                 jj = j + i
                 # if jj + w <= N and i + w <= N:
                 _oeMat = getLocal(oeMat, i, jj, image, N)
-                if np.sum(_oeMat == 0) <= (image*image*0.9):
+                if np.sum(_oeMat == 0) <= (image*image*sparsity):
                     data.append(_oeMat)
                     i_list.append(i + ioffset)
                     j_list.append(jj + joffset)
 
             while len(data) >= batchsize or (i + center_size > N - image - start_point and len(data) > 0):
+                count += len(data)
+                
                 bin_i = torch.tensor(np.stack(i_list[:batchsize], axis=0)).to(device)
                 bin_j = torch.tensor(np.stack(j_list[:batchsize], axis=0)).to(device)
                 targetX = torch.tensor(np.stack(data[:batchsize], axis=0)).to(device)
@@ -188,13 +198,21 @@ def dev(batchsize, cpu, gpu, chrom, max_distance, resol, input, output, image, c
                 with torch.no_grad():
                     with autocast():
                         pred = torch.sigmoid(model(targetX.float().to(device)))[slice_obj_pred].flatten()
-                        loop = torch.nonzero(pred>0.5).flatten().cpu()
+                        loop = torch.nonzero(pred>threshold).flatten().cpu()
                         prob = pred[loop].cpu().numpy().flatten().tolist()
                         frag1 = bin_i[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
                         frag2 = bin_j[slice_obj_coord].flatten().cpu().numpy()[loop].flatten().tolist()
 
-                    loopwriter.write(_chrom,frag1,frag2,prob)
-
-
+                    loopwriter.write(_chrom,frag1,frag2,prob)   
+        if count == 0:
+            badc.append(_chrom)
+    
+    if len(badc)==len(chrom):
+        raise ValueError("polaris loop scorelf FAILED :( \nThe '-s' value needs to be increased for more sparse data.")
+    else:
+        print(f'\npolaris loop scorelf FINISHED :)\nLoopscore file saved at {output}')  
+        if len(badc)>0:
+            print(f"But the size of {badc} are too small or their contact matrix are too sparse.\nYou may need to check the data or run these chr respectively by increasing -s.")         
+    
 if __name__ == '__main__':
-    dev()
+    scorelf()

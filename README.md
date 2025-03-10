@@ -27,8 +27,8 @@
 > - Check your GPU's status and available memory.
 > - Reduce the --batchsize parameter. (The default value of 128 requires approximately 36GB of CUDA memory. Setting it to 24 will reduce the requirement to less than 10GB.)
 
-## Documentation
-📝 **Extensive documentation** can be found at: [Polaris Doc](https://nucleome-polaris.readthedocs.io/en/latest/).
+## [📝Documentation](https://nucleome-polaris.readthedocs.io/en/latest/)
+ **Detailed documentation** can be found at: [Polaris Doc](https://nucleome-polaris.readthedocs.io/en/latest/).
 
 ## Installation
 Polaris is developed and tested on Linux machines with python3.9 and relies on several libraries including pytorch, scipy, etc. 
@@ -43,55 +43,33 @@ conda create -n polaris python=3.9
 conda activate polaris
 ```
 -------
-### ❗️Important Note❗️: Downloading Polaris Network  Weights
-
-The Polaris repository utilizes Git Large File Storage (Git-LFS) to host its pre-trained model weight files. Standard `git clone` operations **will not** automatically download these large files unless Git-LFS is installed and configured. 
-
-To resolve this, please follow one of the methods below:
-
-#### Method 1: Manual Download via Browser
-
-1. Directly download the pre-trained model weights (`sft_loop.pt`) from the [Polaris model directory](https://github.com/ai4nucleome/Polaris/blob/master/polaris/model/sft_loop.pt).
-2. Save the file to the directory:
-    ```bash
-    Polaris/polaris/model/
-    ```
-#### Method 2: Install Git-LFS
-1. Install Git-LFS by following the official instructions: [Git-LFS Installation Guide](https://git-lfs.com/).
-
-2. After installation, either:
-
-    Re-clone the repository:
-
-    ```bash
-    git clone https://github.com/ai4nucleome/Polaris.git
-    ```
-    OR, if the repository is already cloned, run:
-
-    ```bash
-    git lfs pull
-    ```
-    This ensures all large files, including model weights, are retrieved.
-----------
-
-Install [PyTorch](https://pytorch.org/get-started/locally/) as described on their website. It might be the following command depending on your cuda version:
-
-```bash
-pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
-```
 Install Polaris:
 ```bash
-pip install --use-pep517 --editable .
+./setup.sh
 ```
-If fail, please try `python setup build` and `python setup install` first.
+It will automatically download Polaris model's weights from [Hugging Face](https://huggingface.co/rr-ss/Polaris) and install Polaris.
 
-The installation requires network access to download libraries. Usually, the installation will finish within 5 minutes. The installation time is longer if network access is slow and/or unstable.
+You can also download model's weights file manually from [there](https://huggingface.co/rr-ss/Polaris/resolve/main/polaris/model/sft_loop.pt?download=true) and put it in `Polaris/polaris/model`.
+
+
+
+The installation requires network access to download libraries. Usually, the installation will finish within 3 minutes. The installation time is longer if network access is slow and/or unstable.
 
 ## Quick Start for Loop Annotation
+For detailed documentation or parameter setting, please run:
+```bash
+polaris --help
+```
+or **check the instruction [here](https://nucleome-polaris.readthedocs.io/en/latest/)**.
+
+---
+To quick run **Polaris** at 5kb resolution with default parameters, you can use the command snippets below:
 ```bash
 polaris loop pred -i [input mcool file] -o [output path of annotated loops]
 ```
 It outputs predicted loops from the input contact map at 5kb resolution.
+
+---
 ### output format
 It contains tab separated fields as follows:
 ```

@@ -7,7 +7,7 @@
 
 import click
 from polaris.loopScore import score
-from polaris.loopDev import dev
+from polaris.loopLF import scorelf
 from polaris.loopPool import pool
 from polaris.loop import pred
 from polaris.utils.util_cool2bcool import cool2bcool
@@ -42,7 +42,7 @@ def util():
 
 loop.add_command(pred)
 loop.add_command(score)
-loop.add_command(dev)
+loop.add_command(scorelf)
 loop.add_command(pool)
 
 util.add_command(depth)
