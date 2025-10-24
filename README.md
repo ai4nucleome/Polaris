@@ -1,3 +1,9 @@
+**The detailed documentation of Polaris and its usage can be found at this link:** https://nucleome-polaris.readthedocs.io/en/latest
+
+**The Hugging Face page of Polaris is:** https://huggingface.co/rr-ss/Polaris , where the **weights file** and **exapmle mcool** to run Polaris can be found.
+
+**The tutorials can be found under the example folder**.
+
 <img src="./doc/logo.png" alt="Polaris" title="Polaris" width="400">
 
 # A Universal Framework for Chromatin Loop Annotation from Bulk and Single-cell Contact Maps
@@ -52,7 +58,24 @@ conda create -n polaris python=3.9
 conda activate polaris
 ```
 -------
-Install Polaris:
+### Package dependencies
+Polaris relies on the following packages:
+```setuptools==75.1.0
+appdirs==1.4.4
+click==8.0.1
+cooler==0.8.11
+matplotlib==3.8.0
+numpy==1.22.4
+pandas==1.3.0
+scikit-learn==1.4.2
+scipy==1.7.3
+timm==0.6.12
+tqdm==4.65.0
+```
+Please install PyTorch == 2.2.2 according to its official [documentation](https://pytorch.org/get-started/previous-versions/). We recommend using [PyTorch 2.2.2](https://pytorch.org/get-started/previous-versions/#linux-and-windows-23) for best compatibility.
+
+
+### Install Polaris:
 ```bash
 ./setup.sh
 ```
@@ -65,6 +88,8 @@ You can also download model's weights file manually from [there](https://hugging
 The installation requires network access to download libraries. Usually, the installation will finish within 3 minutes. The installation time is longer if network access is slow and/or unstable.
 
 ## Quick Start for Loop Annotation
+**Detailed documentation** can be found at 🛜 **this link**: [Polaris Doc](https://nucleome-polaris.readthedocs.io/en/latest/) 🛜.
+
 **For detailed documentation or parameter setting, please run:**
 ```bash
 polaris --help
@@ -72,11 +97,13 @@ polaris --help
 or **check the instruction [here](https://nucleome-polaris.readthedocs.io/en/latest/)**.
 
 ---
-To quick run **Polaris** at 5kb resolution with default parameters, you can use the command snippets below:
+To quick run **Polaris** at **5kb** resolution with **default parameters**, you can use the command snippets below:
 ```bash
 polaris loop pred -i [input mcool file] -o [output path of annotated loops]
 ```
-It outputs predicted loops from the input contact map at 5kb resolution.
+`-i` indicates the path of input mcool file; `-o` indicates the path of output path of detected loops in bed format; At default parameters, polaris will detected loops from input contact map at **5kb** resolution for all autosomes.
+
+The more **detailed parameter instructions** can be found at this link: 🛜 [Polaris Doc at ReadTheBook](https://nucleome-polaris.readthedocs.io/en/latest/CLI_reference.html#) 🛜
 
 ---
 ### output format
