@@ -1,6 +1,6 @@
 <img src="./doc/logo.png" alt="Polaris" title="Polaris" width="400">
 
-# A Versatile Framework for Chromatin Loop Annotation in Bulk and Single-cell Hi-C Data
+# A Universal Framework for Chromatin Loop Annotation from Bulk and Single-cell Contact Maps
 
 <div style="text-align: center;">
     <a href="https://github.com/ai4nucleome/Polaris">README (EN)</a>  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;     
@@ -32,8 +32,7 @@
 
 > ❗️<b>NOTE❗️:</b> We suggest users run Polaris on <b>GPU</b>. 
 > You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. 
-
-> ❗️**NOTE❗️:** If you encounter a `CUDA OUT OF MEMORY` error, please:
+> If you encounter a `CUDA OUT OF MEMORY` error, please: 
 > - Check your GPU's status and available memory.
 > - Reduce the --batchsize parameter. (The default value of 128 requires approximately 36GB of CUDA memory. Setting it to 24 will reduce the requirement to less than 10GB.)
 
