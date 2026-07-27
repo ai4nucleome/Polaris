@@ -1,47 +1,45 @@
-# Example Use of Loop Annotaion and APA 
+# Example Usage: Loop Annotation and APA
 
-This folder contains two subfolders that showcase example results of **Polaris** on loop prediction and aggregated peak analysis.
+This folder contains worked examples of **Polaris** for chromatin loop annotation and aggregate peak analysis (APA), with sample data and expected outputs. Each subfolder has its own step-by-step `README`:
 
-You can re-run **Polaris** to reproduce these results by following the commands provided in the sections below.
+- [**`loop_annotation/`**](./loop_annotation) — annotate loops from a contact map (three equivalent workflows) and interpret the output.
+- [**`APA/`**](./APA) — aggregate peak analysis of the annotated loops.
 
-> **Note:** If you encounter a `CUDA OUT OF MEMORY` error, please:
-> - Check your GPU's status and available memory.
-> - Reduce the --batchsize parameter. (The default value of 128 requires approximately 36GB of CUDA memory. Setting it to 24 will reduce the requirement to less than 10GB.)
+For the complete documentation and CLI reference, see the [Polaris documentation](https://nucleome-polaris.readthedocs.io/en/latest/).
 
-## Loop Prediction on GM12878 (250M Valid Read Pairs)
+## Input data
 
-You can download example data from the [Hugging Face repo of Polaris](https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true) by runing:
+Polaris takes a chromosomal contact map as input, in either the multi-resolution cooler (`.mcool`) or band-cooler (`.bcool`) format, at 5 kb resolution by default. Depending on the assay:
+
+- **Bulk Hi-C / Micro-C / DNA SPRITE:** use a processed `.mcool` (e.g. from the [4DN data portal](https://data.4dnucleome.org)), or convert your own data with [cooler](https://cooler.readthedocs.io).
+- **Single-cell Hi-C (scHi-C):** the Polaris command is **identical** to bulk — you only prepare the input differently. First aggregate contact maps from cells of the same type into a single **pseudo-bulk** `.mcool` (e.g. by summing per-cell `.cool` files with `cooler merge`, or from a `.scool`), then run Polaris exactly as in the bulk example. Polaris can annotate loops from as few as ~25 cells.
+
+> ❗ **GPU / memory note:** we recommend running Polaris on a **GPU**. If you encounter a `CUDA OUT OF MEMORY` error, reduce the `--batchsize` parameter (the default 128 needs ~36 GB of GPU memory; 24 needs less than 10 GB).
+
+## Command-line subcommands
+
+| Command | Purpose |
+|---|---|
+| `polaris loop pred`    | Annotate loops directly (scoring + clustering in one step). |
+| `polaris loop score`   | Output a per-pixel loop-score file. |
+| `polaris loop pool`    | Cluster a loop-score file into discrete loops. |
+| `polaris loop scorelf` | Memory-efficient scoring for very large / high-coverage / high-resolution maps. |
+| `polaris util pileup`  | Aggregate peak analysis (APA) of a loop set. |
+
+Run `polaris <command> --help`, or see the [CLI reference](https://nucleome-polaris.readthedocs.io/en/latest/CLI_reference.html) for the full list of parameters.
+
+## Quick start
+
 ```bash
-wget https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true -O "./loop_annotation/GM12878_250M.bcool"
-```
-And run following code to annotate loops from the example data:
-```bash
-polaris loop pred --chrom chr15,chr16,chr17 -i ./loop_annotation/GM12878_250M.bcool -o ./loop_annotation/GM12878_250M_chr151617_loops.bedpe
-```
+# 1. download the example bulk Hi-C contact map (GM12878, 250M valid read pairs)
+wget "https://huggingface.co/rr-ss/Polaris/resolve/main/example/loop_annotation/GM12878_250M.bcool?download=true" -O ./loop_annotation/GM12878_250M.bcool
 
-The [loop_annotation](https://github.com/compbiodsa/Polaris/tree/master/example/loop_annotation) sub-folder contains the results on bulk Hi-C data of GM12878 (250M valid read pairs).
+# 2. annotate loops on chr15-17
+polaris loop pred -c chr15,chr16,chr17 -i ./loop_annotation/GM12878_250M.bcool -o ./loop_annotation/GM12878_250M_chr151617_loops.bedpe -t 0.5
 
-
-
-## APA of Loops Detected by Polaris
-
-``` bash
-polaris util pileup --savefig ./APA/GM12878_250M_chr151617_loops.pileup.png --p2ll True ./loop_annotation/GM12878_250M_chr151617_loops.bedpe ./loop_annotation/GM12878_250M.bcool
+# 3. aggregate peak analysis of the annotated loops
+polaris util pileup --savefig ./APA/GM12878_250M_chr151617_loops.pileup.png --p2ll True \
+    ./loop_annotation/GM12878_250M_chr151617_loops.bedpe ./loop_annotation/GM12878_250M.bcool
 ```
 
-The [APA](https://github.com/compbiodsa/Polaris/tree/master/example/APA) sub-folder contains the Aggregate Peak Analysis result of loops detected on GM12878 (250M Valid Read Pairs) by Polaris.
-
-<div style="text-align: center;">
-    <figure>
-        <img src="./APA/GM12878_250M_chr151617_loops.pileup.png" 
-             alt="GM12878_250M_chr151617_loops" 
-             title="GM12878_250M_chr151617_loops" 
-             width="150">
-        <figcaption>APA of loops on GM12878 (250M Valid Read Pairs)</figcaption>
-    </figure>
-</div>
-
-
----
-- **Extensive documentation** can be found at: [Polaris Documentaion](https://nucleome-polaris.readthedocs.io/en/latest/).
-- You can find more detailed tutorials in the **Jupyter Notebooks located within the respective subfolders**.
+See [`loop_annotation/README.md`](./loop_annotation) and [`APA/README.md`](./APA) for the full walkthroughs and expected outputs.
