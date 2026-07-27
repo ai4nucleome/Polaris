@@ -1,8 +1,4 @@
-**The detailed documentation of Polaris and its usage can be found at this link:** https://nucleome-polaris.readthedocs.io/en/latest
-
-**The Hugging Face page of Polaris is:** https://huggingface.co/rr-ss/Polaris , where the **weights file** and **example mcool** to run Polaris can be found.
-
-**The tutorials can be found under the example folder**.
+📝 [**Documentation**](https://nucleome-polaris.readthedocs.io/en/latest) &nbsp;|&nbsp; 📚 [**Tutorials**](https://github.com/ai4nucleome/Polaris/tree/master/example) &nbsp;|&nbsp; 🤗 [**Hugging Face**](https://huggingface.co/rr-ss/Polaris) (model weights & example data) &nbsp;|&nbsp; 📦 [**Reproducibility**](https://zenodo.org/records/14294273)
 
 <img src="./doc/logo.png" alt="Polaris" title="Polaris" width="400">
 
@@ -33,8 +29,16 @@
 </div>
 
 
-- Using examples for single cell Hi-C and bulk cell Hi-C loop annotations are under [**example folder**](https://github.com/ai4nucleome/Polaris/tree/master/example).
-- The scripts and data to **reproduce our analysis** can be found at: [**Polaris Reproducibility**](https://zenodo.org/records/14294273).
+## 📚 Tutorials
+Step-by-step walkthroughs with example data and expected outputs are provided in the [**`example/`**](https://github.com/ai4nucleome/Polaris/tree/master/example) folder:
+
+| Tutorial | Content |
+|---|---|
+| [**Loop annotation**](https://github.com/ai4nucleome/Polaris/tree/master/example/loop_annotation) | Annotate loops from a contact map: three equivalent workflows (`loop pred`; `loop score` + `loop pool`; `loop scorelf` for large maps), with example data and output format. |
+| [**Aggregate peak analysis**](https://github.com/ai4nucleome/Polaris/tree/master/example/APA) | Pile up the contact signal at annotated loops with `polaris util pileup`. |
+| [**CLI walkthrough**](https://github.com/ai4nucleome/Polaris/blob/master/example/CLI_walkthrough.ipynb) | Overview of all Polaris commands and options. |
+
+The scripts and data to **reproduce the analyses in our paper** are available at [**Polaris Reproducibility**](https://zenodo.org/records/14294273).
 
 > ❗️<b>NOTE❗️:</b> We suggest users run Polaris on <b>GPU</b>. 
 > You can run Polaris on CPU for loop annotations, but it is much slower than on GPU. 
@@ -99,9 +103,21 @@ or **check the instruction [here](https://nucleome-polaris.readthedocs.io/en/lat
 ---
 To quick run **Polaris** at **5kb** resolution with **default parameters**, you can use the command snippets below:
 ```bash
-polaris loop pred -i [input mcool file] -o [output path of annotated loops]
+polaris loop pred -i [input contact map] -o [output path of annotated loops]
 ```
-`-i` indicates the path of input mcool file; `-o` indicates the path of output path of detected loops in bed format; At default parameters, polaris will detected loops from input contact map at **5kb** resolution for all autosomes.
+`-i` indicates the path of the input contact map (a multi-resolution cooler `.mcool` or band cooler `.bcool` file); `-o` indicates the path of the output file of detected loops in `.bedpe` format. With default parameters, Polaris detects loops from the input contact map at **5kb** resolution for all autosomes.
+
+### Single-cell Hi-C
+The command for **scHi-C is identical** to bulk: you only prepare the input differently. Aggregate contact maps from cells of the same type into a single **pseudo-bulk** `.mcool` (e.g. by summing per-cell `.cool` files with [`cooler merge`](https://cooler.readthedocs.io), or from a `.scool`), then run the same command. Polaris annotates loops from as few as **~25 cells**.
+
+### Subcommands
+| Command | Purpose |
+|---|---|
+| `polaris loop pred`    | Annotate loops directly (scoring + clustering in one step). |
+| `polaris loop score`   | Output a per-pixel loop-score file. |
+| `polaris loop pool`    | Cluster a loop-score file into discrete loops. |
+| `polaris loop scorelf` | Memory-efficient scoring for very large / high-coverage / high-resolution maps. |
+| `polaris util pileup`  | Aggregate peak analysis (APA) of a loop set. |
 
 The more **detailed parameter instructions** can be found at this link: 🛜 [Polaris Doc at ReadTheBook](https://nucleome-polaris.readthedocs.io/en/latest/CLI_reference.html#) 🛜
 
