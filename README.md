@@ -1,4 +1,4 @@
-📝 [**Documentation**](https://nucleome-polaris.readthedocs.io/en/latest) &nbsp;|&nbsp; 📚 [**Tutorials**](https://github.com/ai4nucleome/Polaris/tree/master/example) &nbsp;|&nbsp; 🤗 [**Hugging Face**](https://huggingface.co/rr-ss/Polaris) (model weights & example data) &nbsp;|&nbsp; 📦 [**Reproducibility**](https://zenodo.org/records/14294273)
+🌐 [**Project page**](https://ai4nucleome.github.io/Polaris/) &nbsp;|&nbsp; 📝 [**Documentation**](https://nucleome-polaris.readthedocs.io/en/latest) &nbsp;|&nbsp; 📚 [**Tutorials**](https://github.com/ai4nucleome/Polaris/tree/master/example) &nbsp;|&nbsp; 🤗 [**Hugging Face**](https://huggingface.co/rr-ss/Polaris) (model weights & example data) &nbsp;|&nbsp; 📦 [**Reproducibility**](https://zenodo.org/records/14294273)
 
 <img src="./doc/logo.png" alt="Polaris" title="Polaris" width="400">
 
