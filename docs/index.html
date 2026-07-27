@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Polaris &mdash; Chromatin loop annotation from bulk and single-cell contact maps</title>
+  <meta name="description" content="Polaris: a universal framework for chromatin loop annotation from bulk and single-cell contact maps.">
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <style>
+    /* Bulma sizes are rem-based, so the root font-size scales everything proportionally. */
+    html { font-size: 17px; }
+    body { font-family: 'Noto Sans', sans-serif; }
+    .publication-title { font-family: 'Google Sans', sans-serif; }
+    .hero.is-light { background-color: #fafafa; }
+    .author-block { margin-right: 0.5rem; }
+    .figure-caption { color: #555; font-size: 0.95rem; margin-top: 0.85rem;
+                      max-width: 85%; margin-left: auto; margin-right: auto;
+                      text-align: justify; text-justify: inter-word; }
+    /* Justify all body/explanatory paragraphs (headings stay centered). */
+    .section .container p { text-align: justify; text-justify: inter-word; }
+    .section { padding: 3rem 1.5rem; }
+    /* Section headings: single place to tune the size of all section titles. */
+    .section .title.is-3 { font-size: 1.65rem; }
+    .stat-number { font-family: 'Google Sans', sans-serif; font-weight: 700; color: #3273dc; }
+    .footer { padding: 2rem 1.5rem 3rem; }
+    .key-result { border-left: 4px solid #3273dc; padding-left: 1.1rem; margin-bottom: 1.4rem; }
+    img.paper-figure { border: 1px solid #eee; border-radius: 6px; }
+    .hero-logo { max-width: 380px; margin: 0 auto 1rem; display: block; }
+
+    /* --- code / bibtex blocks --- */
+    .code-box, .bibtex-box {
+      background: #1f2430;
+      border: 1px solid #2b3040;
+      border-radius: 8px;
+      padding: 1.25rem 1.4rem;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .code-box pre, .bibtex-box pre { background: transparent; padding: 0; margin: 0; }
+    .code-box code, .bibtex-box code {
+      background: transparent; padding: 0;
+      color: #e6e6e6;
+      font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+      font-size: 0.95rem; line-height: 1.75;
+      text-align: left; white-space: pre;
+    }
+    .code-box .cmd { color: #7ee787; }      /* commands */
+    .code-box .arg { color: #79c0ff; }      /* placeholders / paths */
+    .code-box .cmt { color: #8b949e; }      /* comments */
+    /* inline code stays light, to contrast with the dark blocks */
+    p code, li code { background: #f0f2f5; color: #c7254e; border-radius: 4px;
+                      padding: 0.1rem 0.35rem; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <img src="static/logo.png" alt="Polaris" class="hero-logo">
+
+          <h2 class="subtitle is-3 publication-title">
+            A universal framework for chromatin loop annotation from bulk and single-cell contact maps
+          </h2>
+
+          <!-- Authors -->
+          <div class="is-size-5 publication-authors" style="margin-top: 1.25rem;">
+            <span class="author-block">Yusen Hou<sup>1</sup>,</span>
+            <span class="author-block">Audrey Baguette<sup>2</sup>,</span>
+            <span class="author-block">Mathieu Blanchette<sup>3,&#42;</sup>,</span>
+            <span class="author-block">Yanlin Zhang<sup>1,4,&#42;</sup></span>
+          </div>
+
+          <!-- Affiliations -->
+          <div class="is-size-6 publication-authors has-text-grey-dark" style="margin-top: 0.6rem;">
+            <span class="author-block"><sup>1</sup>Data Science and Analytics Thrust, The Hong Kong University of Science and Technology (Guangzhou)</span><br>
+            <span class="author-block"><sup>2</sup>Quantitative Life Sciences, McGill University</span><br>
+            <span class="author-block"><sup>3</sup>School of Computer Science, McGill University</span><br>
+            <span class="author-block"><sup>4</sup>The Hong Kong University of Science and Technology, Hong Kong</span><br>
+            <span class="author-block"><sup>&#42;</sup>Corresponding authors: mathieu.blanchette@mcgill.ca, yanlinzhang@hkust-gz.edu.cn</span>
+          </div>
+
+          <div class="is-size-6 has-text-grey" style="margin-top: 0.5rem;">
+            In submission, 2026
+          </div>
+
+          <!-- Links -->
+          <div class="publication-links" style="margin-top: 1.5rem;">
+            <span class="link-block">
+              <a href="https://github.com/ai4nucleome/Polaris" class="button is-dark is-rounded">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Code</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://nucleome-polaris.readthedocs.io/en/latest/" class="button is-info is-rounded">
+                <span class="icon"><i class="fas fa-book"></i></span>
+                <span>Docs</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://huggingface.co/rr-ss/Polaris" class="button is-warning is-rounded">
+                <span class="icon">🤗</span>
+                <span>Model</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://zenodo.org/records/14294273" class="button is-success is-rounded">
+                <span class="icon"><i class="fas fa-database"></i></span>
+                <span>Reproducibility</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://doi.org/10.1101/2024.12.24.630215" class="button is-danger is-rounded">
+                <span class="icon"><i class="ai ai-biorxiv"></i></span>
+                <span>Preprint</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="#bibtex" class="button is-link is-rounded">
+                <span class="icon"><i class="fas fa-quote-left"></i></span>
+                <span>Cite</span>
+              </a>
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ONE-LINE SUMMARY ============================== -->
+<section class="section has-background-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">One-line summary</h2>
+    <p class="is-size-5">
+      Polaris reads the <strong>megabase-scale architecture</strong> around each contact &mdash; the stripes, domain boundaries
+      and co-occurring loops along its entire row and column &mdash; not just the local signal. One model annotates loops in
+      bulk Hi-C, single-cell Hi-C, Micro-C and DNA SPRITE, without retraining.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== OVERVIEW ============================== -->
+<section class="section">
+  <div class="container is-max-desktop has-text-centered">
+    <h2 class="title is-3">Illustrated overview</h2>
+    <img src="static/Polaris.png" alt="Polaris model overview" class="paper-figure" style="max-width: 90%;">
+    <p class="figure-caption">
+      Polaris combines <strong>axial attention</strong> with a U-Net backbone. It takes a 224&times;224 region of a contact map and
+      predicts a loop score for every pixel at once, so each prediction is informed by the stripes, domain boundaries and
+      co-occurring loops that share its row and column.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== KEY RESULTS ============================== -->
+<section class="section has-background-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Key results</h2>
+
+    <div class="key-result">
+      <p><strong>One model, every assay.</strong> Trained once on bulk Hi-C, Polaris annotates loops from bulk Hi-C, single-cell
+      Hi-C, Micro-C and DNA SPRITE contact maps <em>without any retraining or manual tuning</em>.</p>
+    </div>
+
+    <div class="key-result">
+      <p><strong>Loops from as few as ~25 cells.</strong> On aggregated single-cell Hi-C, Polaris recovers known long-range
+      interactions (for example the <em>Sox2</em> promoter&ndash;super-enhancer contact) from far fewer cells than existing tools.</p>
+    </div>
+
+    <div class="key-result">
+      <p><strong>More experimentally supported loops.</strong> Across CTCF/RAD21 ChIA-PET and H3K27ac/SMC1 HiChIP validation
+      sets, Polaris recovers more supported loops per called loop than alternative methods, and its anchors are more strongly
+      enriched for CTCF binding sites and convergent CTCF motifs.</p>
+    </div>
+
+    <div class="key-result">
+      <p><strong>Robust and fast.</strong> Performance holds across sequencing depths, resolutions, cell types and species
+      (human, mouse, zebrafish), with essentially no false positives on cohesin-depleted controls &mdash; and a genome-wide
+      run finishes in minutes on a single GPU.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WHY AXIAL ATTENTION ============================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Loops do not live alone</h2>
+    <p>
+      Most loop callers decide whether a contact is a loop by looking at a small window around it: is this pixel brighter than
+      its immediate surroundings? That works when the signal is strong, but it throws away the context that makes a loop
+      recognisable in the first place. Loops sit at the corners of domains, line up along architectural stripes, and co-occur
+      with other loops in the same row or column &mdash; structure that extends far beyond any local window.
+    </p>
+    <p>
+      Polaris is built around that observation. <strong>Axial attention</strong> lets every position exchange information along
+      its entire row and its entire column of the contact map, so the model can see a stripe or a domain boundary that is
+      megabases away while still resolving the loop at kilobase precision. This is what makes it robust when the data are
+      sparse: even when the central pixel is noisy, the surrounding architecture is still informative.
+    </p>
+    <div class="has-text-centered" style="margin-top: 1.5rem;">
+      <img src="static/fig1.png" alt="Polaris architecture and performance overview" class="paper-figure" style="max-width: 100%;">
+      <p class="figure-caption">
+        Polaris architecture, its pre-training / fine-tuning paradigm, and loop annotation across bulk Hi-C, single-cell Hi-C,
+        Micro-C and DNA SPRITE. Bottom right: a loop detected from only 25 aggregated mES cells at the <em>Sox2</em> locus,
+        aligned with CTCF and H3K27ac ChIP-seq.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LEARNING WITHOUT LABELS ============================== -->
+<section class="section has-background-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Learning where labels are scarce</h2>
+    <p>
+      Chromatin loops are a needle-in-a-haystack labelling problem: experimentally validated loops cover a vanishing fraction
+      of all contact pairs, which makes it hard to train a model that scores every pixel of a large region at once. Polaris
+      sidesteps this with <strong>knowledge distillation</strong>: it is first pre-trained on a large collection of unlabelled
+      Hi-C maps using the continuous predictions of an existing reference-panel method as soft targets, then fine-tuned on
+      ChIA-PET and HiChIP-supported loops.
+    </p>
+    <p>
+      The result is a model that inherits the accuracy of a reference-panel method <em>without needing a reference panel at
+      prediction time</em>. That is what frees Polaris from being tied to a particular species or resolution, and lets it be
+      applied directly to data &mdash; such as zebrafish embryos &mdash; for which no reference panel exists.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== BENCHMARK ============================== -->
+<section class="section">
+  <div class="container is-max-desktop has-text-centered">
+    <h2 class="title is-3">Benchmarking</h2>
+    <img src="static/fig3.png" alt="Benchmark on GM12878 bulk Hi-C" class="paper-figure" style="max-width: 100%;">
+    <p class="figure-caption">
+      Comparison on GM12878 Hi-C (500M valid read pairs, held-out test chromosomes 15&ndash;17). Loops annotated by Polaris are
+      more frequently supported by CTCF/RAD21 ChIA-PET and SMC1 HiChIP, show anchor distances matching experimentally
+      supported loops, and are strongly enriched for CTCF binding sites and convergent CTCF motifs.
+    </p>
+
+    <div style="margin-top: 2.5rem;"></div>
+
+    <img src="static/fig2.png" alt="Single-cell Hi-C benchmark" class="paper-figure" style="max-width: 100%;">
+    <p class="figure-caption">
+      Single-cell Hi-C (mouse embryonic stem cells, all 19 autosomes). Polaris detects loops from as few as 25 cells and keeps
+      a stable detection rate as more cells are added; its loops show clearer aggregate enrichment and its anchors fall at
+      domain boundaries more often than those of alternative tools.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== GET STARTED ============================== -->
+<section class="section has-background-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Get started</h2>
+    <p>
+      Polaris is a command line tool. Install it, point it at a contact map, and it writes a <code>.bedpe</code> file of loops:
+    </p>
+    <div class="code-box" style="margin-top: 1.25rem;">
+<pre><code><span class="cmt"># install</span>
+<span class="cmd">git clone</span> https://github.com/ai4nucleome/Polaris.git
+<span class="cmd">cd</span> Polaris &amp;&amp; <span class="cmd">conda create</span> -n polaris python=3.9 &amp;&amp; <span class="cmd">conda activate</span> polaris
+<span class="cmd">./setup.sh</span>
+
+<span class="cmt"># annotate loops</span>
+<span class="cmd">polaris loop pred</span> -i <span class="arg">[contact map .mcool/.bcool]</span> -o <span class="arg">[loops .bedpe]</span></code></pre>
+    </div>
+    <p style="margin-top: 1rem;">
+      <strong>Single-cell Hi-C uses the same command.</strong> Aggregate the cells of one type into a pseudo-bulk
+      <code>.mcool</code> first (for example with <code>cooler merge</code>), then run Polaris exactly as above.
+      See the <a href="https://github.com/ai4nucleome/Polaris/tree/master/example">tutorials</a> for worked examples with data
+      and expected outputs, and the <a href="https://nucleome-polaris.readthedocs.io/en/latest/">documentation</a> for the full
+      CLI reference.
+    </p>
+    <div class="has-text-centered" style="margin-top: 1.5rem;">
+      <img src="static/apa.png" alt="APA of Polaris loops" style="max-width: 260px;">
+      <p class="figure-caption">
+        Aggregate peak analysis of Polaris loops, produced with <code>polaris util pileup</code>: bulk Hi-C (left) and
+        aggregated single-cell Hi-C (right).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CITATION ============================== -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Citation</h2>
+    <div class="bibtex-box">
+<pre><code><span class="cmd">@article</span>{<span class="arg">Hou2024Polaris</span>,
+  title   = {A versatile tool for chromatin loop annotation in bulk and single-cell Hi-C data},
+  author  = {Hou, Yusen and Baguette, Audrey and Blanchette, Mathieu and Zhang, Yanlin},
+  journal = {bioRxiv},
+  year    = {2024},
+  doi     = {10.1101/2024.12.24.630215}
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ACKNOWLEDGEMENTS ============================== -->
+<section class="section has-background-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Acknowledgements</h2>
+    <p>
+      Polaris builds on <a href="https://github.com/BlanchetteLab/RefHiC"><strong>RefHiC</strong></a>
+      (Zhang &amp; Blanchette, <em>Nat. Commun.</em> 2022), whose predictions serve as the teacher for our knowledge-distillation
+      pre-training. We are grateful to the <a href="https://data.4dnucleome.org">4D Nucleome</a> and
+      <a href="https://www.encodeproject.org/">ENCODE</a> consortia, and to the authors of the datasets and tools used in this
+      work, for making their data and software openly available. Polaris also depends on the open-source
+      <a href="https://cooler.readthedocs.io">cooler</a> and <a href="https://pytorch.org">PyTorch</a> ecosystems.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="footer">
+  <div class="container is-max-desktop has-text-centered content">
+    <p>
+      Code is released under the <strong>MIT License</strong>. Model weights and example data are hosted on
+      <a href="https://huggingface.co/rr-ss/Polaris">Hugging Face</a>; scripts and data to reproduce the analyses are on
+      <a href="https://zenodo.org/records/14294273">Zenodo</a>.
+    </p>
+    <p class="is-size-7 has-text-grey">
+      Page template adapted from the
+      <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

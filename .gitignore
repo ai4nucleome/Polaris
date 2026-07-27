@@ -1,6 +1,10 @@
 build/*
 dist/*
 docs/*
+# ...except the GitHub Pages project homepage
+!docs/index.html
+!docs/.nojekyll
+!docs/static/
 polaris.egg-info/*
 polaris/**/__pycache__/
 requirements.txt
