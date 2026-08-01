@@ -1,4 +1,4 @@
-🌐 [**Project page**](https://ai4nucleome.github.io/Polaris/) &nbsp;|&nbsp; 📝 [**Documentation**](https://nucleome-polaris.readthedocs.io/en/latest) &nbsp;|&nbsp; 📚 [**Tutorials**](https://github.com/ai4nucleome/Polaris/tree/master/example) &nbsp;|&nbsp; 🤗 [**Hugging Face**](https://huggingface.co/rr-ss/Polaris) (model weights & example data) &nbsp;|&nbsp; 📦 [**Reproducibility**](https://zenodo.org/records/14294273)
+🌐 [**Project page**](https://ai4nucleome.github.io/Polaris/) &nbsp;|&nbsp; 📝 [**Documentation**](https://nucleome-polaris.readthedocs.io/en/latest) &nbsp;|&nbsp; 📚 [**Tutorials**](https://github.com/ai4nucleome/Polaris/tree/master/example) &nbsp;|&nbsp; 🤗 [**Hugging Face**](https://huggingface.co/rr-ss/Polaris) &nbsp;|&nbsp; 📦 [**Reproducibility**](https://zenodo.org/records/14294273)
 
 <img src="./doc/logo.png" alt="Polaris" title="Polaris" width="400">
 
@@ -120,6 +120,22 @@ The command for **scHi-C is identical** to bulk: you only prepare the input diff
 | `polaris util pileup`  | Aggregate peak analysis (APA) of a loop set. |
 
 The more **detailed parameter instructions** can be found at this link: 🛜 [Polaris Doc at ReadTheBook](https://nucleome-polaris.readthedocs.io/en/latest/CLI_reference.html#) 🛜
+
+### Clustering defaults by resolution
+`polaris loop pool` measures `--distance_cutoff` and `--mindelta` in bins, so the
+stretch of genome they cover grows with the bin size. Their 5 kb values smooth the
+density field across loops that are genuinely separate once the bins get larger, so
+both fall to 2 at 10 kb and 25 kb:
+
+| Resolution | `--distance_cutoff` | `--mindelta` | `--radius` |
+|---|---|---|---|
+| 10 kb, 25 kb | 2 | 2 | 2 |
+| all others   | 5 | 5 | 2 |
+
+On GM12878 Hi-C at 500M valid read pairs, comparing the same number of top-scoring
+calls, the lower values recovered 4 to 15 percent more loops supported by CTCF and
+RAD21 ChIA-PET and by SMC1, H3K27ac and RNAPII data. Pass the options explicitly to
+override the resolution-dependent choice.
 
 ---
 ### output format

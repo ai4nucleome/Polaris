@@ -71,16 +71,25 @@ def rhoDelta(data,resol,dc,radius):
 
 
 @click.command()
-@click.option('-dc','--distance_cutoff', type=int, default=5, help='Distance cutoff for local density calculation in terms of bin. [5]')
+@click.option('-dc','--distance_cutoff', type=int, default=None, help='Distance cutoff for local density calculation in terms of bin. [2 at 10kb and 25kb, 5 otherwise]')
 @click.option('-t','--threshold', type=float, default=0.6, help='Loop score threshold [0.6]')
 @click.option('-r','--resol', default=5000, help='resolution [5000]')
 @click.option('-R','--radius', type=int, default=2, help='Radius threshold to remove outliers. [2]')
-@click.option('-d','--mindelta', type=float, default=5, help='Min distance allowed between two loops [5]')
+@click.option('-d','--mindelta', type=float, default=None, help='Min distance allowed between two loops [2 at 10kb and 25kb, 5 otherwise]')
 @click.option('-i','--candidates', type=str,required=True,help ='Loop candidates file path')
 @click.option('-o','--output', type=str,required=True,help ='.bedpe file path to save loops')
 def pool(distance_cutoff,candidates,resol,mindelta,threshold,output,radius,refine=True):
     """Call loops from loop candidates by clustering
     """
+    # distance_cutoff and mindelta are counted in bins, so the stretch of genome
+    # they cover grows with the bin size. Carrying the 5 kb values over to 10 kb
+    # and 25 kb maps smooths the density field across loops that are genuinely
+    # separate and merges them, which costs recall.
+    if distance_cutoff is None:
+        distance_cutoff = 2 if resol in (10000, 25000) else 5
+    if mindelta is None:
+        mindelta = 2 if resol in (10000, 25000) else 5
+
     print('\npolaris loop pool START :) ')
 
     data = pd.read_csv(candidates, sep='\t', header=None)
