@@ -125,12 +125,13 @@ The more **detailed parameter instructions** can be found at this link: 🛜 [Po
 `polaris loop pool` measures `--distance_cutoff` and `--mindelta` in bins, so the
 stretch of genome they cover grows with the bin size. Their 5 kb values smooth the
 density field across loops that are genuinely separate once the bins get larger, so
-both fall to 2 at 10 kb and 25 kb:
+both fall as the resolution coarsens:
 
 | Resolution | `--distance_cutoff` | `--mindelta` | `--radius` |
 |---|---|---|---|
-| 10 kb, 25 kb | 2 | 2 | 2 |
-| all others   | 5 | 5 | 2 |
+| 10 kb      | 3 | 3 | 2 |
+| 25 kb      | 2 | 2 | 2 |
+| all others | 5 | 5 | 2 |
 
 On GM12878 Hi-C at 500M valid read pairs, comparing the same number of top-scoring
 calls, the lower values recovered 4 to 15 percent more loops supported by CTCF and
